@@ -1,0 +1,770 @@
+//
+//  SWUserManager.swift
+//  ShipSwift
+//
+//  User authentication manager with Amplify/Cognito integration.
+//  Manages session state, email/password auth, Apple/Google social sign-in,
+//  token refresh, guest mode, onboarding flow, and App Store review requests.
+//
+//  Usage:
+//    // 1. Create and inject into SwiftUI environment
+//    @State private var userManager = SWUserManager()
+//    ContentView()
+//        .environment(userManager)
+//
+//    // 2. Observe session state to control navigation
+//    switch userManager.sessionState {
+//    case .loading:       LoadingView()
+//    case .signedOut:     SWAuthView()
+//    case .guest:         MainView()
+//    case .onboarding:    OnboardingView()
+//    case .ready:         MainView()
+//    }
+//
+//    // 3. Email sign-in / sign-up
+//    try await userManager.signUp(email: email, password: password)
+//    try await userManager.confirmSignUp(email: email, code: "123456")
+//    try await userManager.signIn(email: email, password: password)
+//
+//    // 4. Social sign-in
+//    try await userManager.signInWithApple()
+//    try await userManager.signInWithGoogle()
+//
+//    // 5. Get fresh ID token for API calls (auto-refreshes expired tokens)
+//    guard let idToken = await userManager.getFreshIdToken() else { return }
+//    await apiService.fetchData(idToken: idToken)
+//
+//    // 6. Sign out / delete account
+//    await userManager.signOut()
+//    try await userManager.deleteAccount()
+//
+//    // 7. Guest mode
+//    userManager.skipSignIn()     // enter guest mode
+//    userManager.requireSignIn()  // switch back to sign-in page
+//
+//    // 8. Password reset
+//    try await userManager.forgotPassword(email: email)
+//    try await userManager.confirmResetPassword(email: email, newPassword: "newPass", code: "123456")
+//
+//    // 9. Check pro status (requires SWStoreManager)
+//    if SWStoreManager.shared.isPro { /* unlock features */ }
+//
+//    // 10. App Store review request (call after positive user actions)
+//    userManager.incrementActionCompletedCount()
+//
+//  Created by Wei Zhong on 3/1/26.
+//
+
+import Foundation
+import SwiftUI
+import StoreKit
+import Amplify
+import AWSCognitoAuthPlugin
+import AWSPluginsCore
+
+#if canImport(UIKit)
+import UIKit
+#elseif canImport(AppKit)
+import AppKit
+#endif
+
+// MARK: - Session State
+
+/// User session state
+enum SWSessionState: Equatable {
+    case loading
+    case signedOut(errorMessage: String? = nil)
+    case guest                              // Guest mode, skip sign in
+    case onboarding(tokens: SWAuthTokens)   // Signed in, onboarding not completed
+    case ready(tokens: SWAuthTokens)        // Signed in, onboarding completed
+
+    var isSignedIn: Bool {
+        switch self {
+        case .onboarding, .ready: return true
+        case .signedOut, .loading, .guest: return false
+        }
+    }
+
+    var isGuest: Bool {
+        if case .guest = self { return true }
+        return false
+    }
+
+    var isLoading: Bool {
+        if case .loading = self { return true }
+        return false
+    }
+
+    var tokens: SWAuthTokens? {
+        switch self {
+        case .onboarding(let tokens), .ready(let tokens): return tokens
+        case .signedOut, .loading, .guest: return nil
+        }
+    }
+
+    var errorMessage: String? {
+        if case .signedOut(let message) = self { return message }
+        return nil
+    }
+}
+
+// MARK: - Auth Tokens
+
+/// Authentication Tokens
+struct SWAuthTokens: Equatable {
+    let idToken: String
+    let accessToken: String
+    let refreshToken: String
+}
+
+// MARK: - Service Error
+
+/// Service error types
+enum SWServiceError: LocalizedError {
+    case notSignedIn
+    case tokenMissing
+    case invalidURL
+    case networkError
+    case unauthorized
+    case serverError(Int)
+    case timeout
+    case userProfileNotFound
+    case userAlreadyExists
+    case validationError(String)
+    case decodingError
+    case encodingError
+    case invalidResponse
+    case invalidState
+    case unknown(String)
+
+    var errorDescription: String? {
+        switch self {
+        case .notSignedIn: return "Not signed in"
+        case .tokenMissing: return "Session expired, please sign in again"
+        case .invalidURL: return "Invalid URL"
+        case .networkError: return "Network connection failed"
+        case .unauthorized: return "Session expired, please sign in again"
+        case .serverError(let code): return "Server error (\(code))"
+        case .timeout: return "Request timeout, please retry"
+        case .userProfileNotFound: return "User profile not found"
+        case .userAlreadyExists: return "User profile already exists"
+        case .validationError(let message): return "Validation failed: \(message)"
+        case .decodingError: return "Data parsing error"
+        case .encodingError: return "Data encoding error"
+        case .invalidResponse: return "Invalid response"
+        case .invalidState: return "Invalid state"
+        case .unknown(let message): return message
+        }
+    }
+}
+
+// MARK: - User Manager
+
+@MainActor
+@Observable
+final class SWUserManager {
+
+    // MARK: - Storage Keys
+
+    private enum StorageKey: String {
+        case isFirstLaunch
+        case appLaunchCount
+        case actionCompletedCount
+        case lastReviewRequestDate
+        case hasRequestedReview
+    }
+
+    // MARK: - Review Request Configuration
+
+    private enum ReviewConfig {
+        static let minActions = 2             // At least 2 completed actions
+        static let minLaunches = 3            // At least 3 app launches
+        static let daysBetweenRequests = 30   // Days between review requests
+        static let delayBeforeRequest: Duration = .seconds(1)  // Delay before request
+    }
+
+    // MARK: - Properties
+
+    /// Whether to skip the Amplify auth check (used in Preview environments)
+    private let skipAuthCheck: Bool
+
+    /// User session state
+    var sessionState: SWSessionState = .loading
+
+    /// Whether an authentication operation is in progress
+    var isAuthenticating = false
+
+    /// Whether this is the first launch (stored property, trackable by @Observable)
+    var isFirstLaunch: Bool = false {
+        didSet {
+            // Note: stores whether first launch has been completed, so invert the value
+            UserDefaults.standard.set(!isFirstLaunch, forKey: StorageKey.isFirstLaunch.rawValue)
+        }
+    }
+
+    private let authService = SWAuthService.shared
+
+    // Review request related properties
+    private var actionCompletedCount: Int {
+        get { UserDefaults.standard.integer(forKey: StorageKey.actionCompletedCount.rawValue) }
+        set { UserDefaults.standard.set(newValue, forKey: StorageKey.actionCompletedCount.rawValue) }
+    }
+
+    private var appLaunchCount: Int {
+        get { UserDefaults.standard.integer(forKey: StorageKey.appLaunchCount.rawValue) }
+        set { UserDefaults.standard.set(newValue, forKey: StorageKey.appLaunchCount.rawValue) }
+    }
+
+    private var hasRequestedReview: Bool {
+        get { UserDefaults.standard.bool(forKey: StorageKey.hasRequestedReview.rawValue) }
+        set { UserDefaults.standard.set(newValue, forKey: StorageKey.hasRequestedReview.rawValue) }
+    }
+
+    private var lastReviewRequestDate: Date? {
+        get { UserDefaults.standard.object(forKey: StorageKey.lastReviewRequestDate.rawValue) as? Date }
+        set { UserDefaults.standard.set(newValue, forKey: StorageKey.lastReviewRequestDate.rawValue) }
+    }
+
+    // MARK: - Initialization
+
+    init(skipAuthCheck: Bool = false) {
+        self.skipAuthCheck = skipAuthCheck
+        self.isFirstLaunch = !UserDefaults.standard.bool(forKey: StorageKey.isFirstLaunch.rawValue)
+        appLaunchCount += 1
+
+        if !skipAuthCheck {
+            // Check authentication status
+            Task {
+                await checkAuthStatus()
+            }
+        } else {
+            sessionState = .signedOut()
+        }
+    }
+
+    // MARK: - Public Methods
+
+    func completeFirstLaunch() {
+        isFirstLaunch = false  // didSet automatically syncs to UserDefaults
+    }
+
+    // MARK: - Auth Status Check
+
+    /// Check authentication status and update session state
+    func checkAuthStatus() async {
+        sessionState = .loading
+
+        let isSignedIn = await authService.isSignedIn()
+
+        if isSignedIn {
+            do {
+                let tokens = try await authService.fetchTokens()
+                // Default to ready state directly
+                // If there is an onboarding flow, query backend status here
+                sessionState = .ready(tokens: tokens)
+            } catch {
+                // Session expired or token invalid, sign out to clean up local Amplify cache
+                swDebugLog("⚠️ [SWUserManager] Session expired, signing out:", error)
+                await authService.signOut()
+                sessionState = .signedOut()
+            }
+        } else {
+            sessionState = .signedOut()
+        }
+    }
+
+    // MARK: - Email/Password Authentication
+
+    /// Sign up
+    func signUp(email: String, password: String) async throws {
+        isAuthenticating = true
+        defer { isAuthenticating = false }
+        try await authService.signUp(email: email, password: password)
+    }
+
+    /// Confirm email verification code
+    func confirmSignUp(email: String, code: String) async throws {
+        isAuthenticating = true
+        defer { isAuthenticating = false }
+        try await authService.confirmSignUp(email: email, code: code)
+    }
+
+    /// Resend verification code
+    func resendSignUpCode(email: String) async throws {
+        try await authService.resendSignUpCode(email: email)
+    }
+
+    /// Sign in with email and password
+    func signIn(email: String, password: String) async throws {
+        isAuthenticating = true
+        defer { isAuthenticating = false }
+
+        let tokens = try await authService.signIn(email: email, password: password)
+        sessionState = .ready(tokens: tokens)
+    }
+
+    // MARK: - Social Sign In
+
+    /// Apple Sign In
+    func signInWithApple() async throws {
+        swDebugLog("🍎 [Auth] Starting Apple Sign In...")
+
+        guard let window = SWWindowHelper.keyWindow else {
+            swDebugLog("🍎 [Auth] ❌ Cannot get window")
+            throw SWServiceError.unknown("Cannot get window")
+        }
+
+        isAuthenticating = true
+        defer { isAuthenticating = false }
+
+        do {
+            swDebugLog("🍎 [Auth] Calling authService.signInWithApple...")
+            let tokens = try await authService.signInWithApple(presentationAnchor: window)
+            swDebugLog("🍎 [Auth] ✅ Apple Sign In successful, got tokens")
+            sessionState = .ready(tokens: tokens)
+        } catch {
+            swDebugLog("🍎 [Auth] ❌ Apple Sign In failed:", error)
+            throw error
+        }
+    }
+
+    /// Google Sign In
+    func signInWithGoogle() async throws {
+        guard let window = SWWindowHelper.keyWindow else {
+            throw SWServiceError.unknown("Cannot get window")
+        }
+
+        isAuthenticating = true
+        defer { isAuthenticating = false }
+
+        let tokens = try await authService.signInWithGoogle(presentationAnchor: window)
+        sessionState = .ready(tokens: tokens)
+    }
+
+    // MARK: - Guest Mode
+
+    /// Skip sign in and enter guest mode
+    func skipSignIn() {
+        sessionState = .guest
+    }
+
+    /// Require sign in (switch from guest mode to sign in page)
+    func requireSignIn() {
+        sessionState = .signedOut()
+    }
+
+    // MARK: - Sign Out / Delete Account
+
+    /// Sign out
+    func signOut() async {
+        await authService.signOut()
+        sessionState = .signedOut()
+    }
+
+    /// Delete account
+    func deleteAccount() async throws {
+        try await authService.deleteUser()
+        sessionState = .signedOut()
+    }
+
+    // MARK: - Phone Authentication
+
+    /// Send phone verification code
+    func sendPhoneVerificationCode(phoneNumber: String) async throws {
+        isAuthenticating = true
+        defer { isAuthenticating = false }
+        try await authService.sendPhoneVerificationCode(phoneNumber: phoneNumber)
+    }
+
+    /// Confirm phone sign-in with verification code
+    func confirmPhoneSignIn(phoneNumber: String, code: String) async throws {
+        isAuthenticating = true
+        defer { isAuthenticating = false }
+        let tokens = try await authService.confirmPhoneSignIn(phoneNumber: phoneNumber, code: code)
+        sessionState = .ready(tokens: tokens)
+    }
+
+    // MARK: - Password Reset
+
+    /// Forgot password
+    func forgotPassword(email: String) async throws {
+        try await authService.forgotPassword(email: email)
+    }
+
+    /// Reset password
+    func confirmResetPassword(email: String, newPassword: String, code: String) async throws {
+        try await authService.confirmResetPassword(email: email, newPassword: newPassword, code: code)
+    }
+
+    // MARK: - Onboarding
+
+    /// Complete onboarding questionnaire, transition to ready state
+    func completeOnboarding() {
+        guard let tokens = sessionState.tokens else { return }
+        sessionState = .ready(tokens: tokens)
+    }
+
+    // MARK: - Token Management
+
+    /// Get the latest ID Token (automatically refreshes expired tokens)
+    ///
+    /// Important: Use this method to get token before each API call,
+    /// instead of directly using the cached `sessionState.tokens?.idToken`
+    ///
+    /// How it works:
+    /// 1. Calls `authService.fetchTokens()` -> `Amplify.Auth.fetchAuthSession()`
+    /// 2. SDK automatically checks if ID Token is expired (default 1 hour)
+    /// 3. If expired, SDK uses Refresh Token to obtain a new ID Token
+    /// 4. Also updates the cached tokens
+    ///
+    /// Returns nil when:
+    /// - User is not signed in
+    /// - Refresh Token expired (30 days of inactivity), requires re-sign-in
+    ///
+    /// Usage example:
+    /// ```swift
+    /// guard let idToken = await userManager.getFreshIdToken() else { return }
+    /// await apiService.fetchData(idToken: idToken)
+    /// ```
+    func getFreshIdToken() async -> String? {
+        guard sessionState.isSignedIn else {
+            return nil
+        }
+
+        do {
+            let tokens = try await authService.fetchTokens()
+
+            // Also update the cached tokens
+            switch sessionState {
+            case .onboarding:
+                sessionState = .onboarding(tokens: tokens)
+            case .ready:
+                sessionState = .ready(tokens: tokens)
+            default:
+                break
+            }
+
+            return tokens.idToken
+        } catch {
+            // Refresh token expired, sign out to avoid "fake logged-in" state
+            swDebugLog("⚠️ [SWUserManager] Token refresh failed, signing out:", error)
+            await authService.signOut()
+            sessionState = .signedOut()
+            return nil
+        }
+    }
+
+    /// Refresh session
+    func refreshSession() async throws {
+        guard sessionState.tokens != nil else {
+            throw SWServiceError.tokenMissing
+        }
+
+        let newTokens = try await authService.refreshSession()
+
+        switch sessionState {
+        case .onboarding:
+            sessionState = .onboarding(tokens: newTokens)
+        case .ready:
+            sessionState = .ready(tokens: newTokens)
+        default:
+            break
+        }
+    }
+
+    // MARK: - Review Request
+
+    /// Record completed action count
+    func incrementActionCompletedCount() {
+        actionCompletedCount += 1
+        requestReviewIfAppropriate()
+    }
+
+    /// Call after user completes a positive action
+    func recordPositiveUserAction() {
+        requestReviewIfAppropriate()
+    }
+
+    private func requestReviewIfAppropriate() {
+        guard shouldRequestReview() else { return }
+
+        Task {
+            try? await Task.sleep(for: ReviewConfig.delayBeforeRequest)
+            await requestReview()
+        }
+    }
+
+    private func shouldRequestReview() -> Bool {
+        if hasRequestedReview, let lastDate = lastReviewRequestDate {
+            let daysSinceLastRequest = Calendar.current.dateComponents(
+                [.day],
+                from: lastDate,
+                to: .now
+            ).day ?? 0
+
+            guard daysSinceLastRequest >= ReviewConfig.daysBetweenRequests else {
+                return false
+            }
+        }
+
+        return actionCompletedCount >= ReviewConfig.minActions
+            && appLaunchCount >= ReviewConfig.minLaunches
+    }
+
+    private func requestReview() async {
+        #if os(iOS)
+        guard let scene = UIApplication.shared.connectedScenes
+            .first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene
+        else { return }
+
+        AppStore.requestReview(in: scene)
+        #elseif os(macOS)
+        // Review request via StoreKit scene API not available on macOS
+        #endif
+
+        hasRequestedReview = true
+        lastReviewRequestDate = .now
+    }
+}
+
+// MARK: - Auth Service
+
+/// Authentication Service - uses Amplify SDK directly
+actor SWAuthService {
+    static let shared = SWAuthService()
+
+    private init() {}
+
+    // MARK: - Email/Password Authentication
+
+    /// Sign up a new user
+    func signUp(email: String, password: String) async throws {
+        _ = try await Amplify.Auth.signUp(
+            username: email,
+            password: password,
+            options: AuthSignUpRequest.Options(
+                userAttributes: [AuthUserAttribute(.email, value: email)]
+            )
+        )
+    }
+
+    /// Confirm email verification code
+    func confirmSignUp(email: String, code: String) async throws {
+        let result = try await Amplify.Auth.confirmSignUp(
+            for: email,
+            confirmationCode: code
+        )
+
+        guard result.isSignUpComplete else {
+            throw SWServiceError.invalidState
+        }
+    }
+
+    /// Resend verification code
+    func resendSignUpCode(email: String) async throws {
+        _ = try await Amplify.Auth.resendSignUpCode(for: email)
+    }
+
+    /// Sign in with email and password
+    func signIn(email: String, password: String) async throws -> SWAuthTokens {
+        let result = try await Amplify.Auth.signIn(
+            username: email,
+            password: password
+        )
+
+        guard result.isSignedIn else {
+            throw SWServiceError.notSignedIn
+        }
+
+        return try await fetchTokens()
+    }
+
+    // MARK: - Social Sign In
+
+    /// Apple Sign In
+    func signInWithApple(presentationAnchor: AuthUIPresentationAnchor) async throws -> SWAuthTokens {
+        swDebugLog("🍎 [SWAuthService] signInWithApple started")
+
+        // If already signed in, sign out first
+        if await isSignedIn() {
+            swDebugLog("🍎 [SWAuthService] Already signed in, signing out first...")
+            await signOut()
+        }
+
+        let pluginOptions = AWSAuthWebUISignInOptions(preferPrivateSession: true)
+        let options = AuthWebUISignInRequest.Options(pluginOptions: pluginOptions)
+
+        do {
+            let result = try await Amplify.Auth.signInWithWebUI(
+                for: .apple,
+                presentationAnchor: presentationAnchor,
+                options: options
+            )
+
+            guard result.isSignedIn else {
+                throw SWServiceError.notSignedIn
+            }
+
+            return try await fetchTokens()
+        } catch let error as AuthError {
+            swDebugLog("🍎 [SWAuthService] ❌ AuthError:", error.errorDescription)
+            throw error
+        } catch {
+            swDebugLog("🍎 [SWAuthService] ❌ Unknown Error:", String(describing: error))
+            throw error
+        }
+    }
+
+    /// Google Sign In
+    func signInWithGoogle(presentationAnchor: AuthUIPresentationAnchor) async throws -> SWAuthTokens {
+        // If already signed in, sign out first
+        if await isSignedIn() {
+            await signOut()
+        }
+
+        let pluginOptions = AWSAuthWebUISignInOptions(preferPrivateSession: true)
+        let options = AuthWebUISignInRequest.Options(pluginOptions: pluginOptions)
+
+        let result = try await Amplify.Auth.signInWithWebUI(
+            for: .google,
+            presentationAnchor: presentationAnchor,
+            options: options
+        )
+
+        guard result.isSignedIn else {
+            throw SWServiceError.notSignedIn
+        }
+
+        return try await fetchTokens()
+    }
+
+    // MARK: - Token Management
+
+    /// Fetch current tokens
+    func fetchTokens() async throws -> SWAuthTokens {
+        let session = try await Amplify.Auth.fetchAuthSession()
+
+        guard let cognitoSession = session as? AWSAuthCognitoSession else {
+            throw SWServiceError.tokenMissing
+        }
+
+        let tokensResult = cognitoSession.getCognitoTokens()
+
+        switch tokensResult {
+        case .success(let tokens):
+            return SWAuthTokens(
+                idToken: tokens.idToken,
+                accessToken: tokens.accessToken,
+                refreshToken: tokens.refreshToken
+            )
+        case .failure:
+            throw SWServiceError.tokenMissing
+        }
+    }
+
+    /// Refresh tokens
+    func refreshSession() async throws -> SWAuthTokens {
+        let session = try await Amplify.Auth.fetchAuthSession(options: .forceRefresh())
+
+        guard let cognitoSession = session as? AWSAuthCognitoSession else {
+            throw SWServiceError.tokenMissing
+        }
+
+        let tokensResult = cognitoSession.getCognitoTokens()
+
+        switch tokensResult {
+        case .success(let tokens):
+            return SWAuthTokens(
+                idToken: tokens.idToken,
+                accessToken: tokens.accessToken,
+                refreshToken: tokens.refreshToken
+            )
+        case .failure:
+            throw SWServiceError.tokenMissing
+        }
+    }
+
+    // MARK: - Sign Out / Delete Account
+
+    /// Sign out
+    func signOut() async {
+        _ = await Amplify.Auth.signOut()
+    }
+
+    /// Delete user account
+    func deleteUser() async throws {
+        try await Amplify.Auth.deleteUser()
+    }
+
+    /// Check sign in status
+    func isSignedIn() async -> Bool {
+        do {
+            let session = try await Amplify.Auth.fetchAuthSession()
+            return session.isSignedIn
+        } catch {
+            return false
+        }
+    }
+
+    // MARK: - Phone Authentication
+
+    /// Send verification code to phone number via custom auth flow
+    func sendPhoneVerificationCode(phoneNumber: String) async throws {
+        // Sign out any existing session first to start fresh
+        if await isSignedIn() {
+            await signOut()
+        }
+
+        let result = try await Amplify.Auth.signIn(username: phoneNumber)
+        // Cognito custom auth flow sends verification code automatically
+        guard case .confirmSignInWithCustomChallenge = result.nextStep else {
+            if result.isSignedIn {
+                return // Already signed in
+            }
+            throw SWServiceError.invalidState
+        }
+    }
+
+    /// Confirm phone sign-in with verification code
+    func confirmPhoneSignIn(phoneNumber: String, code: String) async throws -> SWAuthTokens {
+        let result = try await Amplify.Auth.confirmSignIn(challengeResponse: code)
+        guard result.isSignedIn else {
+            throw SWServiceError.notSignedIn
+        }
+        return try await fetchTokens()
+    }
+
+    // MARK: - Password Reset
+
+    /// Forgot password - send verification code
+    func forgotPassword(email: String) async throws {
+        _ = try await Amplify.Auth.resetPassword(for: email)
+    }
+
+    /// Reset password - set new password using verification code
+    func confirmResetPassword(email: String, newPassword: String, code: String) async throws {
+        try await Amplify.Auth.confirmResetPassword(
+            for: email,
+            with: newPassword,
+            confirmationCode: code
+        )
+    }
+}
+
+// MARK: - Window Helper
+
+/// Cross-platform helper to retrieve the key window for auth presentation anchors
+private enum SWWindowHelper {
+    #if os(iOS)
+    static var keyWindow: UIWindow? {
+        UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .flatMap { $0.windows }
+            .first { $0.isKeyWindow }
+    }
+    #elseif os(macOS)
+    static var keyWindow: NSWindow? {
+        NSApplication.shared.keyWindow ?? NSApplication.shared.windows.first
+    }
+    #endif
+}
