@@ -1,0 +1,2135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NFL STREET REBORN</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@700&family=Anton&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#000;overflow:hidden;cursor:none;font-family:'Oswald',sans-serif}
+canvas{display:block;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}
+#hud{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:10}
+#score-bug{position:absolute;top:24px;left:24px;background:rgba(20,16,10,0.85);border:1px solid rgba(255,182,18,0.3);border-radius:6px;padding:8px 16px;font-family:'Oswald',sans-serif;color:#fff;backdrop-filter:blur(4px);opacity:0;transition:opacity 0.5s}
+#score-bug .teams{display:flex;gap:20px;align-items:center;font-size:18px;font-weight:700;letter-spacing:1px}
+#score-bug .team{display:flex;align-items:center;gap:8px}
+#score-bug .team-color{width:4px;height:24px;border-radius:2px}
+#score-bug .score{font-size:28px;color:#FFB612;font-family:'Anton',sans-serif}
+#score-bug .meta{font-size:11px;color:rgba(255,240,214,0.6);letter-spacing:2px;text-align:center;margin-top:2px}
+#style-gauge{position:absolute;bottom:32px;right:32px;width:120px;height:120px;opacity:0;transition:opacity 0.5s}
+#action-text{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:'Anton',sans-serif;color:#fff;text-align:center;pointer-events:none;opacity:0;z-index:20}
+#action-text .main{font-size:72px;letter-spacing:4px;text-shadow:0 4px 20px rgba(255,182,18,0.8),0 0 60px rgba(255,182,18,0.4);-webkit-text-stroke:2px rgba(0,0,0,0.3)}
+#action-text .sub{font-size:24px;color:#FFD700;letter-spacing:6px;margin-top:-8px}
+#letterbox-top,#letterbox-bottom{position:absolute;left:0;width:100%;background:#000;z-index:5;transition:height 0.8s cubic-bezier(0.4,0,0.2,1)}
+#letterbox-top{top:0;height:0}
+#letterbox-bottom{bottom:0;height:0}
+#title-overlay{position:absolute;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:15;opacity:0;transition:opacity 1s}
+#title-overlay h1{font-family:'Anton',sans-serif;font-size:96px;color:#FFB612;letter-spacing:8px;text-shadow:0 6px 30px rgba(255,182,18,0.6),0 0 80px rgba(232,160,64,0.3),4px 4px 0 #1e1a14;-webkit-text-stroke:1px rgba(0,0,0,0.5)}
+#title-overlay h2{font-family:'Oswald',sans-serif;font-size:28px;color:rgba(255,240,214,0.7);letter-spacing:12px;margin-top:8px;text-shadow:0 2px 10px rgba(0,0,0,0.8)}
+#title-overlay .start{font-size:16px;color:rgba(255,182,18,0.6);letter-spacing:6px;margin-top:48px;animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:0.4}50%{opacity:1}}
+#end-overlay{position:absolute;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:15;opacity:0;transition:opacity 1.5s}
+#end-overlay h1{font-family:'Anton',sans-serif;font-size:88px;color:#FFB612;letter-spacing:6px;text-shadow:0 6px 40px rgba(255,182,18,0.8),0 0 100px rgba(232,160,64,0.4)}
+#end-overlay h2{font-family:'Oswald',sans-serif;font-size:22px;color:rgba(255,240,214,0.5);letter-spacing:14px;margin-top:12px}
+#player-tag{position:absolute;font-family:'Oswald',sans-serif;font-size:13px;color:rgba(255,240,214,0.9);letter-spacing:2px;text-shadow:0 1px 4px rgba(0,0,0,0.8);opacity:0;transition:opacity 0.3s;z-index:12}
+#grain{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:25;mix-blend-mode:overlay;opacity:0.06}
+#vignette{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:24;background:radial-gradient(ellipse at center,transparent 40%,rgba(0,0,0,0.7) 100%)}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="hud">
+  <div id="score-bug">
+    <div class="teams">
+      <div class="team"><div class="team-color" style="background:#1A5CB0"></div>BUF <span class="score" id="buf-score">0</span></div>
+      <div class="team"><div class="team-color" style="background:#D42A3C"></div>KC <span class="score" id="kc-score">0</span></div>
+    </div>
+    <div class="meta"><span id="quarter">Q1</span> &bull; <span id="clock">5:00</span></div>
+  </div>
+  <canvas id="style-gauge" width="240" height="240"></canvas>
+  <div id="action-text"><div class="main"></div><div class="sub"></div></div>
+  <div id="player-tag"></div>
+</div>
+<div id="letterbox-top"></div>
+<div id="letterbox-bottom"></div>
+<div id="title-overlay">
+  <h1>NFL STREET REBORN</h1>
+  <h2>BILLS vs CHIEFS</h2>
+  <div class="start">PRESS ANYWHERE TO BEGIN</div>
+</div>
+<div id="end-overlay">
+  <h1>NFL STREET REBORN</h1>
+  <h2>BUILT FOR THE STREETS</h2>
+</div>
+<canvas id="grain" width="512" height="512"></canvas>
+<div id="vignette"></div>
+
+<script>
+// ==================== CORE ENGINE ====================
+const W = 1280, H = 720;
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+canvas.width = W; canvas.height = H;
+
+// Offscreen canvases
+const concreteCanvas = document.createElement('canvas');
+const concreteCx = concreteCanvas.getContext('2d');
+concreteCanvas.width = 1024; concreteCanvas.height = 1024;
+
+const bloomCanvas = document.createElement('canvas');
+const bloomCx = bloomCanvas.getContext('2d');
+bloomCanvas.width = W/4; bloomCanvas.height = H/4;
+
+// Colors
+const C = {
+  sky: '#231a35', concrete: '#4d4639', concreteLit: '#5e5649',
+  shadow: '#1e1a14', floodLight: '#FFF0D6', amber: '#E8A040',
+  gold: '#FFB612', neonPink: '#D4607A', neonBlue: '#5A9EC7',
+  billsBlue: '#1A5CB0', chiefsRed: '#D42A3C', fence: '#6B6560',
+  crowd: '#1a1815', styleGold: '#FFD700',
+  gbLow: '#AA2828', gbMid: '#D07020', gbHigh: '#E8A020', gbHot: '#FFD060'
+};
+
+// ==================== PERLIN NOISE ====================
+const perm = new Uint8Array(512);
+const grad3 = [[1,1,0],[-1,1,0],[1,-1,0],[-1,-1,0],[1,0,1],[-1,0,1],[1,0,-1],[-1,0,-1],[0,1,1],[0,-1,1],[0,1,-1],[0,-1,-1]];
+(function(){const p=[];for(let i=0;i<256;i++)p[i]=i;for(let i=255;i>0;i--){const j=Math.floor(Math.random()*(i+1));[p[i],p[j]]=[p[j],p[i]];}for(let i=0;i<512;i++)perm[i]=p[i&255];})();
+function noise2D(x,y){
+  const X=Math.floor(x)&255,Y=Math.floor(y)&255;
+  x-=Math.floor(x);y-=Math.floor(y);
+  const u=x*x*(3-2*x),v=y*y*(3-2*y);
+  const a=perm[X]+Y,b=perm[X+1]+Y;
+  function dot(h,x,y){const g=grad3[h%12];return g[0]*x+g[1]*y;}
+  return 0.5+0.5*(u*(v*(dot(perm[b+1],x-1,y-1)-dot(perm[a+1],x,y-1))+dot(perm[a+1],x,y-1)-dot(perm[b],x-1,y)+v*(dot(perm[b],x-1,y)-dot(perm[a],x,y)))+dot(perm[a],x,y)+v*(dot(perm[a+1],x,y-1)-dot(perm[a],x,y)));
+}
+function fbm(x,y,oct=4){let v=0,a=0.5,f=1;for(let i=0;i<oct;i++){v+=a*noise2D(x*f,y*f);a*=0.5;f*=2;}return v;}
+
+// ==================== PROCEDURAL CONCRETE TEXTURE ====================
+function generateConcrete(){
+  const w=1024,h=1024,id=concreteCx.createImageData(w,h),d=id.data;
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){
+    const i=(y*w+x)*4;
+    let n=fbm(x/80,y/80,5);
+    // Base concrete color with variation
+    let r=74+n*30,g=66+n*26,b=57+n*20;
+    // Aggregate spots
+    const ag=noise2D(x/3,y/3);
+    if(ag>0.72){r+=15;g+=12;b+=8;}
+    if(ag<0.28){r-=10;g-=8;b-=6;}
+    // Expansion joints every 200px
+    const jx=x%200,jy=y%200;
+    if(jx<2||jy<2){r=30;g=26;b=22;}
+    // Random cracks
+    const cr=noise2D(x/200+5.7,y/200+3.2);
+    if(cr>0.48&&cr<0.52){const ci=fbm(x/20,y/20,2);if(ci>0.4&&ci<0.6){r=25;g=22;b=18;}}
+    // Patches (repairs)
+    const pa=noise2D(x/300+10,y/300+10);
+    if(pa>0.7){r+=8;g+=6;b+=4;}
+    d[i]=Math.max(0,Math.min(255,r));d[i+1]=Math.max(0,Math.min(255,g));d[i+2]=Math.max(0,Math.min(255,b));d[i+3]=255;
+  }
+  concreteCx.putImageData(id,0,0);
+}
+
+// ==================== PERSPECTIVE SYSTEM ====================
+// World coords: x=-50..50 (width), y=0..100 (depth, 0=near camera, 100=far endzone)
+const VP = {x: W/2, y: H*0.28}; // vanishing point
+const NEAR_Y = H*0.95; // bottom of screen (near)
+const NEAR_HALF_W = W*0.55; // half-width at near
+
+function worldToScreen(wx, wy) {
+  // wy: 0=near camera, 100=far endzone
+  const t = wy / 100; // 0..1
+  const depth = Math.pow(t, 0.7); // non-linear for perspective feel
+  const sy = NEAR_Y + (VP.y - NEAR_Y) * depth;
+  const halfW = NEAR_HALF_W * (1 - depth * 0.7);
+  const sx = VP.x + (wx / 50) * halfW;
+  return {x: sx, y: sy};
+}
+
+function scaleAtDepth(wy) {
+  const t = wy / 100;
+  return 1 - t * 0.6; // 1.0 at near, 0.4 at far
+}
+
+// ==================== CAMERA ====================
+const camera = {
+  x: 0, y: 0, zoom: 1, shakeX: 0, shakeY: 0,
+  targetX: 0, targetY: 0, targetZoom: 1,
+  hitch: 0, // frames to freeze
+  angle: 0, // rotation in radians
+  breathe: 0
+};
+
+function updateCamera(dt) {
+  if (camera.hitch > 0) { camera.hitch--; return; }
+  camera.x += (camera.targetX - camera.x) * 0.05;
+  camera.y += (camera.targetY - camera.y) * 0.05;
+  camera.zoom += (camera.targetZoom - camera.zoom) * 0.08;
+  // Decay shake
+  camera.shakeX *= 0.9;
+  camera.shakeY *= 0.9;
+  // Handheld wobble
+  camera.breathe += dt * 0.001;
+  const wobX = Math.sin(camera.breathe * 1.3) * 0.5;
+  const wobY = Math.cos(camera.breathe * 0.9) * 0.3;
+  camera.shakeX += wobX;
+  camera.shakeY += wobY;
+}
+
+function shakeCamera(intensity) {
+  camera.shakeX += (Math.random() - 0.5) * intensity;
+  camera.shakeY += (Math.random() - 0.5) * intensity;
+}
+
+// ==================== PARTICLE SYSTEM ====================
+class Particle {
+  constructor(x, y, vx, vy, size, color, life, blend='source-over') {
+    this.x=x;this.y=y;this.vx=vx;this.vy=vy;this.size=size;
+    this.color=color;this.life=life;this.maxLife=life;this.blend=blend;
+    this.gravity=0;this.drag=0.99;this.sizeDecay=true;
+  }
+  update(dt) {
+    this.vy += this.gravity * dt;
+    this.vx *= this.drag; this.vy *= this.drag;
+    this.x += this.vx * dt; this.y += this.vy * dt;
+    this.life -= dt;
+  }
+  draw(ctx) {
+    if(this.life<=0)return;
+    const a = Math.max(0, this.life / this.maxLife);
+    const s = this.sizeDecay ? this.size * a : this.size;
+    ctx.save();
+    ctx.globalCompositeOperation = this.blend;
+    ctx.globalAlpha = a;
+    ctx.fillStyle = this.color;
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, s, 0, Math.PI*2);
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
+const particles = [];
+function emitBurst(x,y,count,opts={}) {
+  for(let i=0;i<count;i++){
+    const angle = Math.random()*Math.PI*2;
+    const speed = (opts.speed||2) * (0.5+Math.random());
+    const p = new Particle(
+      x,y,Math.cos(angle)*speed,Math.sin(angle)*speed,
+      opts.size||3, opts.color||C.gold, opts.life||1, opts.blend||'lighter'
+    );
+    p.gravity = opts.gravity||0;
+    p.drag = opts.drag||0.98;
+    particles.push(p);
+  }
+}
+function emitSparks(x,y,count){
+  emitBurst(x,y,count,{speed:5,size:2,color:'#FFE4A0',life:0.6,gravity:200,drag:0.97});
+}
+
+// Ambient dust particles
+const dustParticles = [];
+for(let i=0;i<40;i++){
+  dustParticles.push({
+    x:Math.random()*W, y:Math.random()*H,
+    vx:(Math.random()-0.5)*0.3, vy:-Math.random()*0.5-0.1,
+    size:Math.random()*2+0.5, alpha:Math.random()*0.3+0.1,
+    phase:Math.random()*Math.PI*2
+  });
+}
+
+// ==================== SHOCKWAVE SYSTEM ====================
+const shockwaves = [];
+function addShockwave(x,y,maxR,duration,color){
+  shockwaves.push({x,y,r:0,maxR,t:0,dur:duration,color:color||C.gold});
+}
+
+// ==================== ACTION TEXT SYSTEM ====================
+let actionTextTimer = 0;
+let actionTextScale = 0;
+function showActionText(main, sub, duration=1.5) {
+  const el = document.getElementById('action-text');
+  el.querySelector('.main').textContent = main;
+  el.querySelector('.sub').textContent = sub || '';
+  el.style.opacity = '1';
+  el.style.transform = 'translate(-50%,-50%) scale(1.3) rotate(-2deg)';
+  actionTextScale = 1.3;
+  actionTextTimer = duration;
+  shakeCamera(8);
+  // Slam animation
+  setTimeout(() => {
+    el.style.transform = 'translate(-50%,-50%) scale(1) rotate(-1deg)';
+    el.style.transition = 'transform 0.15s cubic-bezier(0.2,0,0,1), opacity 0.5s';
+  }, 50);
+}
+function updateActionText(dt) {
+  if (actionTextTimer > 0) {
+    actionTextTimer -= dt;
+    if (actionTextTimer <= 0) {
+      const el = document.getElementById('action-text');
+      el.style.opacity = '0';
+      el.style.transform = 'translate(-50%,-60%) scale(0.95) rotate(-1deg)';
+    }
+  }
+}
+
+// ==================== PLAYER RENDERING ====================
+function drawPlayer(ctx, sx, sy, scale, opts={}) {
+  const s = scale * 55; // base height
+  const jerseyColor = opts.color || C.billsBlue;
+  const number = opts.number || '';
+  const pose = opts.pose || 'standing'; // standing, running, juking, celebrating, tackled, crouching
+  const facing = opts.facing || 1; // 1=away from camera (toward endzone), -1=toward camera
+  const rimLight = opts.rimLight !== false;
+  const hasBall = opts.hasBall || false;
+  const gbActive = opts.gbActive || false;
+
+  ctx.save();
+  ctx.translate(sx, sy);
+
+  // Ball carrier glow
+  if (hasBall) {
+    const grd = ctx.createRadialGradient(0, 0, 0, 0, 0, s*1.2);
+    grd.addColorStop(0, 'rgba(255,182,18,0.25)');
+    grd.addColorStop(1, 'rgba(255,182,18,0)');
+    ctx.fillStyle = grd;
+    ctx.beginPath();
+    ctx.arc(0, 0, s*1.2, 0, Math.PI*2);
+    ctx.fill();
+  }
+
+  // GB fire trail
+  if (gbActive) {
+    for(let i=0;i<5;i++){
+      const grd = ctx.createRadialGradient(-i*3*scale, i*2*scale, 0, -i*3*scale, i*2*scale, s*0.4);
+      grd.addColorStop(0, `rgba(255,180,20,${0.3-i*0.05})`);
+      grd.addColorStop(1, 'rgba(255,100,0,0)');
+      ctx.fillStyle = grd;
+      ctx.beginPath();
+      ctx.arc(-i*3*scale, i*2*scale, s*0.4, 0, Math.PI*2);
+      ctx.fill();
+    }
+  }
+
+  // Shadow on ground
+  ctx.save();
+  ctx.scale(1, 0.3);
+  ctx.fillStyle = 'rgba(0,0,0,0.4)';
+  ctx.beginPath();
+  ctx.ellipse(0, s*0.3, s*0.35, s*0.15, 0, 0, Math.PI*2);
+  ctx.fill();
+  ctx.restore();
+
+  let lean = 0;
+  if (pose === 'running') lean = -0.15;
+  if (pose === 'juking') lean = -0.3;
+  if (pose === 'celebrating') lean = 0.05;
+
+  ctx.rotate(lean);
+
+  // Legs
+  const legW = s * 0.1;
+  const legH = s * 0.35;
+  const legSpread = pose === 'running' ? s*0.15 : s*0.08;
+  ctx.fillStyle = '#fff'; // white pants
+  // Left leg
+  ctx.save();
+  if(pose==='running'){ctx.rotate(-0.2);ctx.translate(-legSpread,-legH*0.3);}
+  ctx.fillRect(-legSpread-legW/2, -legH, legW, legH);
+  // Knee pad
+  ctx.fillStyle = 'rgba(200,200,200,0.5)';
+  ctx.fillRect(-legSpread-legW/2-1, -legH*0.5, legW+2, legW*0.6);
+  ctx.restore();
+  // Right leg
+  ctx.fillStyle = '#fff';
+  ctx.save();
+  if(pose==='running'){ctx.rotate(0.15);ctx.translate(legSpread,legH*0.1);}
+  ctx.fillRect(legSpread-legW/2, -legH, legW, legH);
+  ctx.restore();
+
+  // Cleats
+  ctx.fillStyle = '#111';
+  ctx.fillRect(-legSpread-legW/2-1, -2, legW+2, 3);
+  ctx.fillRect(legSpread-legW/2-1, -2, legW+2, 3);
+
+  // Torso
+  const torsoW = s * 0.32;
+  const torsoH = s * 0.3;
+  const torsoY = -legH;
+  ctx.fillStyle = jerseyColor;
+  // Shoulder pads make it wider at top
+  ctx.beginPath();
+  ctx.moveTo(-torsoW*0.8, torsoY);
+  ctx.lineTo(-torsoW*1.1, torsoY - torsoH*0.7);
+  ctx.lineTo(-torsoW*1.15, torsoY - torsoH);
+  ctx.lineTo(torsoW*1.15, torsoY - torsoH);
+  ctx.lineTo(torsoW*1.1, torsoY - torsoH*0.7);
+  ctx.lineTo(torsoW*0.8, torsoY);
+  ctx.closePath();
+  ctx.fill();
+  // Jersey sheen
+  ctx.fillStyle = 'rgba(255,255,255,0.1)';
+  ctx.fillRect(-torsoW*0.3, torsoY-torsoH*0.8, torsoW*0.6, torsoH*0.5);
+
+  // Number on back/front
+  if (number && s > 15) {
+    ctx.fillStyle = 'rgba(255,255,255,0.9)';
+    ctx.font = `bold ${Math.max(8,s*0.18)}px 'Oswald',sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.fillText(number, 0, torsoY - torsoH*0.35);
+  }
+
+  // Arms
+  const armW = s * 0.06;
+  const armH = s * 0.25;
+  ctx.fillStyle = '#8B6914'; // skin tone
+  const shoulderX = torsoW * 1.1;
+  const shoulderY = torsoY - torsoH * 0.85;
+  // Left arm
+  ctx.save();
+  if(pose==='running'){ctx.translate(-shoulderX,shoulderY);ctx.rotate(0.4);ctx.fillRect(-armW/2,0,armW,armH);ctx.restore();}
+  else if(pose==='celebrating'){ctx.translate(-shoulderX,shoulderY);ctx.rotate(-0.8);ctx.fillRect(-armW/2,0,armW,armH);ctx.restore();}
+  else if(pose==='juking'){ctx.translate(-shoulderX,shoulderY);ctx.rotate(0.6);ctx.fillRect(-armW/2,0,armW,armH);ctx.restore();}
+  else{ctx.translate(-shoulderX,shoulderY);ctx.rotate(0.15);ctx.fillRect(-armW/2,0,armW,armH);ctx.restore();}
+  // Right arm
+  ctx.save();
+  if(pose==='running'&&hasBall){ctx.translate(shoulderX,shoulderY);ctx.rotate(-0.3);ctx.fillRect(-armW/2,0,armW,armH);
+    // Ball tucked
+    ctx.fillStyle='#6B3A00';ctx.beginPath();ctx.ellipse(0,armH*0.8,s*0.06,s*0.035,0.3,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#fff';ctx.fillRect(-s*0.01,armH*0.7,s*0.02,s*0.04); // laces
+    ctx.restore();
+  }
+  else if(pose==='celebrating'){ctx.translate(shoulderX,shoulderY);ctx.rotate(-1);ctx.fillRect(-armW/2,0,armW,armH);ctx.restore();}
+  else{ctx.translate(shoulderX,shoulderY);ctx.rotate(-0.15);ctx.fillRect(-armW/2,0,armW,armH);ctx.restore();}
+
+  // Helmet
+  const helmetY = torsoY - torsoH - s*0.1;
+  const helmetR = s * 0.11;
+  ctx.fillStyle = jerseyColor === C.billsBlue ? '#1a4a90' : '#b0222e';
+  ctx.beginPath();
+  ctx.arc(0, helmetY, helmetR, 0, Math.PI*2);
+  ctx.fill();
+  // Facemask
+  ctx.strokeStyle = '#999';
+  ctx.lineWidth = Math.max(1, s*0.02);
+  ctx.beginPath();
+  ctx.arc(0, helmetY + helmetR*0.2, helmetR*0.6, -0.3, 0.8);
+  ctx.stroke();
+  // Helmet stripe
+  ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+  ctx.lineWidth = Math.max(1, s*0.03);
+  ctx.beginPath();
+  ctx.moveTo(0, helmetY - helmetR);
+  ctx.lineTo(0, helmetY + helmetR*0.3);
+  ctx.stroke();
+
+  // Rim lighting
+  if (rimLight && s > 12) {
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.strokeStyle = 'rgba(255,240,214,0.15)';
+    ctx.lineWidth = Math.max(1, s*0.04);
+    // Outline the whole player shape
+    ctx.beginPath();
+    ctx.moveTo(-torsoW*1.15, torsoY - torsoH);
+    ctx.lineTo(-torsoW*1.15 - 1, torsoY - torsoH);
+    ctx.lineTo(-legSpread - legW/2 - 1, -2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(torsoW*1.15, torsoY - torsoH);
+    ctx.lineTo(torsoW*1.15 + 1, torsoY - torsoH);
+    ctx.lineTo(legSpread + legW/2 + 1, -2);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  ctx.restore();
+}
+
+// ==================== ENVIRONMENT RENDERING ====================
+
+function drawSky(ctx, t) {
+  // Twilight gradient
+  const grd = ctx.createLinearGradient(0, 0, 0, H*0.45);
+  grd.addColorStop(0, '#0d0a18');
+  grd.addColorStop(0.3, '#1a1230');
+  grd.addColorStop(0.6, '#231a35');
+  grd.addColorStop(0.85, '#2d1f3a');
+  grd.addColorStop(1, '#3a2520'); // warm horizon band
+  ctx.fillStyle = grd;
+  ctx.fillRect(0, 0, W, H*0.45);
+
+  // Stars
+  ctx.fillStyle = 'rgba(255,255,255,0.4)';
+  const starSeed = [23,67,134,189,245,312,378,423,489,534,578,612,656,701,34,89,156,201,267,334];
+  for(let i=0;i<starSeed.length;i++){
+    const sx = (starSeed[i]*3.7)%W;
+    const sy = (starSeed[i]*2.3)%(H*0.3);
+    const ss = 0.5+Math.sin(t*0.002+i)*0.3;
+    ctx.fillRect(sx, sy, ss, ss);
+  }
+
+  // Cloud wisps
+  ctx.save();
+  ctx.globalAlpha = 0.08;
+  for(let i=0;i<3;i++){
+    const cx = W*0.2 + i*W*0.3 + Math.sin(t*0.0003+i)*20;
+    const cy = H*0.1 + i*15;
+    ctx.fillStyle = '#4a3a5a';
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, 120+i*30, 8+i*3, 0.1, 0, Math.PI*2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+function drawBuildings(ctx, t) {
+  // Far layer
+  ctx.fillStyle = '#0f0c14';
+  const buildings = [
+    {x:50,w:80,h:180},{x:140,w:60,h:220},{x:210,w:100,h:160},
+    {x:320,w:70,h:240},{x:400,w:90,h:190},{x:500,w:110,h:210},
+    {x:620,w:75,h:250},{x:710,w:95,h:175},{x:820,w:85,h:230},
+    {x:920,w:100,h:195},{x:1030,w:80,h:215},{x:1130,w:70,h:185}
+  ];
+  const baseY = H*0.38;
+
+  buildings.forEach((b,i) => {
+    ctx.fillStyle = i%3===0 ? '#12101a' : '#0f0c14';
+    ctx.fillRect(b.x, baseY-b.h, b.w, b.h);
+    // Rooftop details
+    ctx.fillStyle = '#1a1520';
+    ctx.fillRect(b.x+10, baseY-b.h-8, 20, 8); // AC unit
+    if(i%4===0){
+      // Water tower
+      ctx.fillRect(b.x+b.w/2-8, baseY-b.h-25, 16, 18);
+      ctx.fillRect(b.x+b.w/2-3, baseY-b.h-30, 6, 5);
+    }
+    // Lit windows
+    if(i===3||i===7){
+      for(let wy=0;wy<5;wy++){
+        for(let wx=0;wx<3;wx++){
+          if(Math.sin(i*10+wy*3+wx*7)>0.3){
+            ctx.fillStyle = 'rgba(255,230,180,0.15)';
+            ctx.fillRect(b.x+15+wx*20, baseY-b.h+20+wy*30, 8, 12);
+          }
+        }
+      }
+    }
+  });
+
+  // Neon signs
+  drawNeonSign(ctx, 180, baseY-200, 'BAR', C.neonPink, t);
+  drawNeonSign(ctx, 850, baseY-230, 'OPEN', C.neonBlue, t, true);
+  drawNeonSign(ctx, 1050, baseY-180, '24H', C.neonPink, t);
+}
+
+function drawNeonSign(ctx, x, y, text, color, t, flicker=false) {
+  let alpha = 0.7;
+  if(flicker){
+    // Realistic electrical flicker
+    const f = Math.sin(t*0.01)*Math.sin(t*0.037)*Math.sin(t*0.0071);
+    alpha = f > -0.3 ? 0.7 : 0.1;
+  }
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  // Glow
+  ctx.shadowColor = color;
+  ctx.shadowBlur = 30;
+  ctx.fillStyle = color;
+  ctx.font = "bold 16px 'Oswald',sans-serif";
+  ctx.fillText(text, x, y);
+  // Extra bloom pass
+  ctx.shadowBlur = 60;
+  ctx.globalAlpha = alpha * 0.3;
+  ctx.fillText(text, x, y);
+  ctx.restore();
+}
+
+function drawCourt(ctx, cam, t, lightIntensity=1) {
+  // Draw concrete court with perspective
+  // The court is a trapezoid: wide at bottom, narrow at top
+  const nearL = worldToScreen(-50, 0);
+  const nearR = worldToScreen(50, 0);
+  const farL = worldToScreen(-50, 100);
+  const farR = worldToScreen(50, 100);
+
+  ctx.save();
+  ctx.translate(cam.shakeX, cam.shakeY);
+
+  // Clip to court shape
+  ctx.beginPath();
+  ctx.moveTo(nearL.x, nearL.y);
+  ctx.lineTo(farL.x, farL.y);
+  ctx.lineTo(farR.x, farR.y);
+  ctx.lineTo(nearR.x, nearR.y);
+  ctx.closePath();
+  ctx.clip();
+
+  // Base concrete fill
+  ctx.fillStyle = C.concrete;
+  ctx.fillRect(0, VP.y-10, W, H);
+
+  // Apply concrete texture with perspective (simplified - tile it)
+  ctx.save();
+  ctx.globalAlpha = 0.6;
+  // Perspective transform approximation
+  const courtH = nearL.y - farL.y;
+  for(let row=0; row<20; row++){
+    const ry = row/20;
+    const y1 = farL.y + courtH*ry;
+    const y2 = farL.y + courtH*(ry+1/20);
+    const w1 = (farR.x-farL.x) + ((nearR.x-nearL.x)-(farR.x-farL.x))*ry;
+    const cx1 = W/2 - w1/2;
+    ctx.drawImage(concreteCanvas, 0, row*51, 1024, 51, cx1, y1, w1, y2-y1);
+  }
+  ctx.restore();
+
+  // Endzone paint (far end = Chiefs red)
+  const ezNear = worldToScreen(-50, 85);
+  const ezFar = worldToScreen(-50, 100);
+  const ezNearR = worldToScreen(50, 85);
+  const ezFarR = worldToScreen(50, 100);
+  ctx.fillStyle = C.chiefsRed;
+  ctx.globalAlpha = 0.8;
+  ctx.beginPath();
+  ctx.moveTo(ezNear.x, ezNear.y);
+  ctx.lineTo(ezFar.x, ezFar.y);
+  ctx.lineTo(ezFarR.x, ezFarR.y);
+  ctx.lineTo(ezNearR.x, ezNearR.y);
+  ctx.closePath();
+  ctx.fill();
+  ctx.globalAlpha = 1;
+
+  // "CHIEFS" text in endzone
+  const ezMid = worldToScreen(0, 93);
+  const ezScale = scaleAtDepth(93);
+  ctx.save();
+  ctx.translate(ezMid.x, ezMid.y);
+  ctx.scale(ezScale*1.5, ezScale*0.6);
+  ctx.fillStyle = 'rgba(255,255,255,0.7)';
+  ctx.font = "900 48px 'Anton',sans-serif";
+  ctx.textAlign = 'center';
+  ctx.fillText('CHIEFS', 0, 10);
+  ctx.restore();
+
+  // Near endzone (Bills blue, partially visible at bottom)
+  const nzNear = worldToScreen(-50, 0);
+  const nzFar = worldToScreen(-50, 12);
+  const nzNearR = worldToScreen(50, 0);
+  const nzFarR = worldToScreen(50, 12);
+  ctx.fillStyle = C.billsBlue;
+  ctx.globalAlpha = 0.6;
+  ctx.beginPath();
+  ctx.moveTo(nzNear.x, nzNear.y);
+  ctx.lineTo(nzFar.x, nzFar.y);
+  ctx.lineTo(nzFarR.x, nzFarR.y);
+  ctx.lineTo(nzNearR.x, nzNearR.y);
+  ctx.closePath();
+  ctx.fill();
+  ctx.globalAlpha = 1;
+
+  // Yard lines
+  ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+  ctx.lineWidth = 1;
+  for(let yd=20; yd<=80; yd+=20) {
+    const l = worldToScreen(-45, yd);
+    const r = worldToScreen(45, yd);
+    ctx.beginPath();
+    ctx.moveTo(l.x, l.y);
+    ctx.lineTo(r.x, r.y);
+    ctx.stroke();
+  }
+
+  // Flood light pools on court
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  const lights = [
+    {wx:-40,wy:10,r:35},{wx:40,wy:10,r:35},
+    {wx:-35,wy:85,r:30},{wx:35,wy:85,r:30}
+  ];
+  lights.forEach(l => {
+    const ls = worldToScreen(l.wx, l.wy);
+    const lr = l.r * (1-l.wy/100*0.5) * 3;
+    const grd = ctx.createRadialGradient(ls.x, ls.y, 0, ls.x, ls.y, lr*lightIntensity);
+    grd.addColorStop(0, `rgba(255,240,214,${0.12*lightIntensity})`);
+    grd.addColorStop(0.5, `rgba(255,220,180,${0.06*lightIntensity})`);
+    grd.addColorStop(1, 'rgba(255,240,214,0)');
+    ctx.fillStyle = grd;
+    ctx.fillRect(ls.x-lr, ls.y-lr, lr*2, lr*2);
+  });
+  // Specular highlights (wet spots)
+  lights.forEach(l => {
+    const ls = worldToScreen(l.wx*0.8, l.wy);
+    ctx.fillStyle = `rgba(255,250,230,${0.04*lightIntensity})`;
+    ctx.beginPath();
+    ctx.ellipse(ls.x, ls.y, 40, 15, 0, 0, Math.PI*2);
+    ctx.fill();
+  });
+  ctx.restore();
+
+  ctx.restore(); // un-clip
+}
+
+function drawFences(ctx, cam, t, deformX, deformY, deformAmount) {
+  // Left fence
+  drawFenceSide(ctx, -1, t, 0, 0);
+  // Right fence (may have deformation)
+  drawFenceSide(ctx, 1, t, deformX||0, deformAmount||0);
+}
+
+function drawFenceSide(ctx, side, t, deformAtY, deformAmt) {
+  // side: -1=left, 1=right
+  const posts = [];
+  for(let yd=0; yd<=100; yd+=10) {
+    const wx = side * 50;
+    const pos = worldToScreen(wx, yd);
+    const s = scaleAtDepth(yd);
+    posts.push({x:pos.x, y:pos.y, s, yd});
+  }
+
+  // Chain-link pattern between posts
+  ctx.save();
+  ctx.strokeStyle = C.fence;
+  ctx.lineWidth = 0.8;
+  ctx.globalAlpha = 0.6;
+
+  for(let i=0; i<posts.length-1; i++){
+    const p1=posts[i], p2=posts[i+1];
+    const fenceH = p1.s * 60; // fence height in pixels
+    // Diamond pattern
+    const diamonds = Math.floor(6 * p1.s);
+    const dw = (p2.x-p1.x)/(diamonds||1);
+    const dh = fenceH / 4;
+
+    for(let d=0;d<diamonds;d++){
+      for(let r=0;r<4;r++){
+        const bx = p1.x + d*dw;
+        const by = p1.y - fenceH + r*dh;
+        // Deformation near impact point
+        let dx=0;
+        if(deformAmt && Math.abs(posts[i].yd - deformAtY) < 15) {
+          const dist = 1 - Math.abs(posts[i].yd - deformAtY)/15;
+          dx = side * deformAmt * dist * Math.sin(r/4*Math.PI);
+        }
+        ctx.beginPath();
+        ctx.moveTo(bx+dx, by+dh/2);
+        ctx.lineTo(bx+dw/2+dx, by);
+        ctx.lineTo(bx+dw+dx, by+dh/2);
+        ctx.lineTo(bx+dw/2+dx, by+dh);
+        ctx.closePath();
+        ctx.stroke();
+      }
+    }
+  }
+  ctx.restore();
+
+  // Fence posts
+  ctx.fillStyle = '#555';
+  posts.forEach(p => {
+    const pw = Math.max(2, p.s * 4);
+    const ph = p.s * 65;
+    ctx.fillRect(p.x - pw/2, p.y - ph, pw, ph);
+    // Post cap
+    ctx.fillStyle = '#666';
+    ctx.fillRect(p.x - pw/2 - 1, p.y - ph - 2, pw+2, 3);
+    ctx.fillStyle = '#555';
+  });
+}
+
+function drawCrowd(ctx, side, t, excitement) {
+  // side: -1=left, 1=right
+  const ex = excitement || 0; // 0-1 excitement level
+  for(let yd=5; yd<=90; yd+=4) {
+    const wx = side * 53; // just outside fence
+    const pos = worldToScreen(wx, yd);
+    const s = scaleAtDepth(yd);
+    if(s < 0.2) continue;
+
+    const count = Math.floor(3 * s);
+    for(let i=0; i<count; i++){
+      const cx = pos.x + side*(5+i*8*s);
+      let cy = pos.y - s*40 - i*s*5;
+
+      // Excitement: arms up, jumping
+      const excited = ex > 0.5 && Math.sin(yd+i*3+t*0.01) > 0;
+      if(excited) cy -= s*8;
+
+      ctx.fillStyle = C.crowd;
+      // Head
+      ctx.beginPath();
+      ctx.arc(cx, cy - s*12, s*4, 0, Math.PI*2);
+      ctx.fill();
+      // Body
+      ctx.fillRect(cx - s*5, cy - s*8, s*10, s*15);
+
+      // Arms up if excited
+      if(excited) {
+        ctx.strokeStyle = C.crowd;
+        ctx.lineWidth = s*3;
+        ctx.beginPath();
+        ctx.moveTo(cx-s*5, cy-s*5);
+        ctx.lineTo(cx-s*8, cy-s*18);
+        ctx.moveTo(cx+s*5, cy-s*5);
+        ctx.lineTo(cx+s*8, cy-s*18);
+        ctx.stroke();
+      }
+
+      // Phone glow (one person per section)
+      if(i===1 && yd%12===5) {
+        ctx.fillStyle = 'rgba(150,180,255,0.3)';
+        ctx.fillRect(cx-s*2, cy-s*15, s*4, s*6);
+      }
+
+      // Subtle lateral sway
+      const sway = Math.sin(t*0.002 + yd*0.1 + i) * s;
+      ctx.fillStyle = C.crowd;
+    }
+  }
+}
+
+function drawVolumetricLights(ctx, t, intensity) {
+  // Light beams from flood light positions
+  const beams = [
+    {sx: 80, sy: H*0.15, ex: W*0.35, ey: H*0.7, w: 120},
+    {sx: W-80, sy: H*0.15, ex: W*0.65, ey: H*0.7, w: 120},
+    {sx: 200, sy: H*0.1, ex: W*0.3, ey: H*0.5, w: 80},
+    {sx: W-200, sy: H*0.1, ex: W*0.7, ey: H*0.5, w: 80}
+  ];
+
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  beams.forEach((b,i) => {
+    ctx.globalAlpha = 0.02 * intensity;
+    ctx.beginPath();
+    ctx.moveTo(b.sx, b.sy);
+    ctx.lineTo(b.ex - b.w/2, b.ey);
+    ctx.lineTo(b.ex + b.w/2, b.ey);
+    ctx.closePath();
+    ctx.fillStyle = C.floodLight;
+    ctx.fill();
+  });
+  ctx.restore();
+
+  // Flood light sources (bright points)
+  const lightSources = [{x:60,y:H*0.08},{x:W-60,y:H*0.08},{x:180,y:H*0.05},{x:W-180,y:H*0.05}];
+  lightSources.forEach(l => {
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    const grd = ctx.createRadialGradient(l.x,l.y,0,l.x,l.y,40*intensity);
+    grd.addColorStop(0, `rgba(255,250,240,${0.8*intensity})`);
+    grd.addColorStop(0.3, `rgba(255,240,214,${0.3*intensity})`);
+    grd.addColorStop(1, 'rgba(255,240,214,0)');
+    ctx.fillStyle = grd;
+    ctx.beginPath();
+    ctx.arc(l.x, l.y, 40*intensity, 0, Math.PI*2);
+    ctx.fill();
+    // Lens flare (anamorphic horizontal streak)
+    ctx.globalAlpha = 0.1 * intensity;
+    ctx.fillStyle = C.floodLight;
+    ctx.fillRect(l.x-100, l.y-1, 200, 2);
+    ctx.restore();
+  });
+}
+
+function drawDust(ctx, t) {
+  dustParticles.forEach(d => {
+    d.x += d.vx + Math.sin(t*0.001 + d.phase)*0.2;
+    d.y += d.vy;
+    if(d.y < 0) { d.y = H; d.x = Math.random()*W; }
+    if(d.x < 0 || d.x > W) d.x = Math.random()*W;
+
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.globalAlpha = d.alpha * (0.5 + 0.5*Math.sin(t*0.003+d.phase));
+    ctx.fillStyle = C.floodLight;
+    ctx.beginPath();
+    ctx.arc(d.x, d.y, d.size, 0, Math.PI*2);
+    ctx.fill();
+    ctx.restore();
+  });
+}
+
+// ==================== HUD RENDERING ====================
+
+function drawStyleGauge(fillPercent, stylePoints, t) {
+  const gc = document.getElementById('style-gauge');
+  const gctx = gc.getContext('2d');
+  const cw = 240, ch = 240;
+  gctx.clearRect(0,0,cw,ch);
+
+  const cx = cw/2, cy = ch/2, r = 85;
+
+  // Background ring
+  gctx.beginPath();
+  gctx.arc(cx, cy, r, 0, Math.PI*2);
+  gctx.strokeStyle = 'rgba(40,30,20,0.8)';
+  gctx.lineWidth = 16;
+  gctx.stroke();
+
+  // Fill arc
+  if(fillPercent > 0) {
+    const startAngle = -Math.PI/2;
+    const endAngle = startAngle + (Math.PI*2) * (fillPercent/100);
+
+    const grad = gctx.createConicGradient(startAngle, cx, cy);
+    grad.addColorStop(0, C.gbLow);
+    grad.addColorStop(0.3, C.gbMid);
+    grad.addColorStop(0.6, C.gbHigh);
+    grad.addColorStop(0.9, C.gbHot);
+    grad.addColorStop(1, C.styleGold);
+
+    gctx.beginPath();
+    gctx.arc(cx, cy, r, startAngle, endAngle);
+    gctx.strokeStyle = grad;
+    gctx.lineWidth = 14;
+    gctx.lineCap = 'round';
+    gctx.stroke();
+
+    // Pulse at the fill point
+    if(fillPercent > 50) {
+      const pulseSize = 1 + Math.sin(t*0.005) * 0.3 * (fillPercent/100);
+      gctx.save();
+      gctx.globalCompositeOperation = 'lighter';
+      const px = cx + Math.cos(endAngle)*r;
+      const py = cy + Math.sin(endAngle)*r;
+      const pg = gctx.createRadialGradient(px,py,0,px,py,20*pulseSize);
+      pg.addColorStop(0, `rgba(255,215,0,${0.6*pulseSize})`);
+      pg.addColorStop(1, 'rgba(255,215,0,0)');
+      gctx.fillStyle = pg;
+      gctx.beginPath();
+      gctx.arc(px,py,20*pulseSize,0,Math.PI*2);
+      gctx.fill();
+      gctx.restore();
+    }
+
+    // Fire effect when full
+    if(fillPercent >= 100) {
+      gctx.save();
+      gctx.globalCompositeOperation = 'lighter';
+      for(let i=0;i<12;i++){
+        const angle = (i/12)*Math.PI*2 + t*0.003;
+        const fx = cx + Math.cos(angle)*r;
+        const fy = cy + Math.sin(angle)*r;
+        const fh = 8 + Math.sin(t*0.01+i*2)*5;
+        const fg = gctx.createRadialGradient(fx,fy-fh/2,0,fx,fy-fh/2,fh);
+        fg.addColorStop(0, 'rgba(255,200,50,0.6)');
+        fg.addColorStop(0.5, 'rgba(255,120,0,0.3)');
+        fg.addColorStop(1, 'rgba(255,60,0,0)');
+        gctx.fillStyle = fg;
+        gctx.beginPath();
+        gctx.arc(fx,fy-fh/2,fh,0,Math.PI*2);
+        gctx.fill();
+      }
+      gctx.restore();
+    }
+  }
+
+  // Center text (style points)
+  gctx.fillStyle = C.styleGold;
+  gctx.font = "bold 36px 'Anton',sans-serif";
+  gctx.textAlign = 'center';
+  gctx.textBaseline = 'middle';
+  gctx.fillText(Math.floor(stylePoints), cx, cy-4);
+
+  // Label
+  gctx.font = "12px 'Oswald',sans-serif";
+  gctx.fillStyle = fillPercent >= 100 ? C.gold : 'rgba(255,240,214,0.4)';
+  gctx.letterSpacing = '3px';
+  gctx.fillText('STYLE', cx, cy+22);
+
+  // GAMEBREAKER text when full
+  if(fillPercent >= 100) {
+    const gbAlpha = 0.5 + Math.sin(t*0.008)*0.5;
+    gctx.fillStyle = `rgba(255,182,18,${gbAlpha})`;
+    gctx.font = "bold 11px 'Oswald',sans-serif";
+    gctx.fillText('GAMEBREAKER', cx, cy+r+24);
+  }
+
+  // Outer ring decoration (bolts/rivets look)
+  gctx.fillStyle = 'rgba(100,90,80,0.4)';
+  for(let i=0;i<8;i++){
+    const angle = (i/8)*Math.PI*2;
+    const bx = cx + Math.cos(angle)*(r+12);
+    const by = cy + Math.sin(angle)*(r+12);
+    gctx.beginPath();
+    gctx.arc(bx,by,2,0,Math.PI*2);
+    gctx.fill();
+  }
+}
+
+// ==================== PLAY CALL RENDERING ====================
+function drawPlayCall(ctx, t, selectedPlay, drawProgress) {
+  // Draw on the court surface at ground level
+  const plays = [
+    {name:'QUICK SLANT', routes:[
+      {sx:0,sy:30,pts:[{x:0,y:30},{x:-8,y:45},{x:-15,y:55}]},
+      {sx:15,sy:30,pts:[{x:15,y:30},{x:15,y:45},{x:5,y:55}]},
+      {sx:-15,sy:30,pts:[{x:-15,y:30},{x:-15,y:50}]}
+    ]},
+    {name:'DEEP BOMB', routes:[
+      {sx:15,sy:30,pts:[{x:15,y:30},{x:15,y:50},{x:15,y:75}]},
+      {sx:-10,sy:30,pts:[{x:-10,y:30},{x:-10,y:45},{x:-20,y:55}]},
+      {sx:0,sy:30,pts:[{x:0,y:30},{x:5,y:40}]}
+    ]},
+    {name:'HB DRAW', routes:[
+      {sx:0,sy:25,pts:[{x:0,y:25},{x:0,y:45},{x:5,y:60}]},
+      {sx:15,sy:30,pts:[{x:15,y:30},{x:20,y:40}]},
+      {sx:-15,sy:30,pts:[{x:-15,y:30},{x:-20,y:40}]}
+    ]},
+    {name:'WALL PLAY', routes:[
+      {sx:15,sy:30,pts:[{x:15,y:30},{x:30,y:45},{x:40,y:55},{x:35,y:65}]},
+      {sx:-10,sy:30,pts:[{x:-10,y:30},{x:-10,y:50}]},
+      {sx:0,sy:30,pts:[{x:0,y:30},{x:5,y:40}]}
+    ]}
+  ];
+
+  const progress = Math.min(1, drawProgress);
+
+  plays.forEach((play, pi) => {
+    const offsetX = (pi - 1.5) * 25;
+    const isSelected = pi === selectedPlay;
+
+    // Draw routes as chalk lines
+    play.routes.forEach(route => {
+      ctx.save();
+      ctx.strokeStyle = isSelected ? C.gold : 'rgba(255,240,214,0.4)';
+      ctx.lineWidth = isSelected ? 2.5 : 1.5;
+      ctx.setLineDash([3,3]);
+
+      const pts = route.pts;
+      const drawPts = Math.floor(pts.length * progress);
+
+      ctx.beginPath();
+      for(let i=0; i<=drawPts && i<pts.length; i++){
+        const sp = worldToScreen(pts[i].x + offsetX, pts[i].y);
+        if(i===0) ctx.moveTo(sp.x, sp.y);
+        else ctx.lineTo(sp.x, sp.y);
+      }
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.restore();
+
+      // Player marker (X or O)
+      if(progress > 0.2){
+        const sp = worldToScreen(route.sx + offsetX, route.sy);
+        ctx.fillStyle = isSelected ? C.gold : 'rgba(255,240,214,0.5)';
+        ctx.font = `bold ${14*scaleAtDepth(route.sy)}px 'Anton',sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.fillText('X', sp.x, sp.y+4);
+      }
+    });
+
+    // Play name
+    if(progress > 0.5){
+      const np = worldToScreen(offsetX, 22);
+      ctx.fillStyle = isSelected ? C.gold : 'rgba(255,240,214,0.35)';
+      ctx.font = `bold ${12*scaleAtDepth(22)}px 'Anton',sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.fillText(play.name, np.x, np.y);
+
+      // Selected glow
+      if(isSelected){
+        ctx.save();
+        ctx.globalCompositeOperation = 'lighter';
+        ctx.shadowColor = C.gold;
+        ctx.shadowBlur = 15;
+        ctx.fillText(play.name, np.x, np.y);
+        ctx.restore();
+      }
+    }
+  });
+
+  // Line of scrimmage
+  if(progress > 0.1){
+    const ll = worldToScreen(-40, 28);
+    const lr = worldToScreen(40, 28);
+    ctx.strokeStyle = 'rgba(255,240,214,0.2)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(ll.x, ll.y);
+    ctx.lineTo(lr.x, lr.y);
+    ctx.stroke();
+  }
+}
+
+// ==================== POST-PROCESSING ====================
+
+function applyFilmGrain(t) {
+  const gc = document.getElementById('grain');
+  const gctx = gc.getContext('2d');
+  const gw = 512, gh = 512;
+  // Only regenerate every 3 frames for performance
+  if(Math.floor(t) % 3 !== 0) return;
+  const id = gctx.createImageData(gw,gh);
+  const d = id.data;
+  for(let i=0;i<d.length;i+=4){
+    const v = Math.random()*255;
+    d[i]=d[i+1]=d[i+2]=v;
+    d[i+3]=255;
+  }
+  gctx.putImageData(id,0,0);
+}
+
+function applyBloom(ctx) {
+  // Downsample bright areas
+  bloomCx.drawImage(canvas, 0, 0, W/4, H/4);
+  // Blur by drawing scaled up with alpha
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  ctx.globalAlpha = 0.15;
+  ctx.filter = 'blur(8px)';
+  ctx.drawImage(bloomCanvas, 0, 0, W, H);
+  ctx.filter = 'none';
+  ctx.globalAlpha = 0.08;
+  ctx.filter = 'blur(20px)';
+  ctx.drawImage(bloomCanvas, 0, 0, W, H);
+  ctx.filter = 'none';
+  ctx.restore();
+}
+
+function applyChromaticAberration(ctx, intensity) {
+  if(intensity < 0.5) return;
+  // Simplified: shift red channel slightly
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  ctx.globalAlpha = 0.03 * intensity;
+  ctx.drawImage(canvas, -2*intensity, 0);
+  ctx.restore();
+}
+
+function applyColorGrading(ctx) {
+  // Warm overlay for lifted blacks
+  ctx.save();
+  ctx.globalCompositeOperation = 'multiply';
+  ctx.globalAlpha = 0.05;
+  ctx.fillStyle = '#FFE8C0';
+  ctx.fillRect(0,0,W,H);
+  ctx.restore();
+  // Warm shadows
+  ctx.save();
+  ctx.globalCompositeOperation = 'screen';
+  ctx.globalAlpha = 0.03;
+  ctx.fillStyle = '#3a2810';
+  ctx.fillRect(0,0,W,H);
+  ctx.restore();
+}
+
+// ==================== SCENE SYSTEM ====================
+let currentScene = 'waiting';
+let sceneStartTime = 0;
+let globalTime = 0;
+let started = false;
+
+// Game state
+const state = {
+  bufScore: 0, kcScore: 7,
+  quarter: 'Q2', clock: '1:34',
+  stylePoints: 0, gbPercent: 0,
+  lightIntensity: 0, // 0-1 for lights on
+  fenceDeform: 0, fenceDeformY: 0,
+  crowdExcitement: 0,
+  letterbox: 0, // 0-1
+  cameraAngle: 0, // for crane shots
+  actionTextQueue: [],
+  activeScene: null
+};
+
+// Player positions for each scene
+const playerConfigs = {
+  line: [
+    // Bills offense (near camera)
+    {wx:0,wy:30,color:C.billsBlue,number:'17',pose:'crouching',hasBall:false,name:'ALLEN'},
+    {wx:-12,wy:30,color:C.billsBlue,number:'73',pose:'crouching'},
+    {wx:12,wy:30,color:C.billsBlue,number:'66',pose:'crouching'},
+    {wx:-24,wy:30,color:C.billsBlue,number:'77',pose:'crouching'},
+    {wx:24,wy:30,color:C.billsBlue,number:'70',pose:'crouching'},
+    {wx:20,wy:25,color:C.billsBlue,number:'14',pose:'standing',name:'DIGGS'},
+    {wx:-20,wy:25,color:C.billsBlue,number:'28',pose:'standing',name:'COOK'},
+    // Chiefs defense
+    {wx:-8,wy:34,color:C.chiefsRed,number:'95',pose:'crouching'},
+    {wx:8,wy:34,color:C.chiefsRed,number:'55',pose:'crouching'},
+    {wx:0,wy:36,color:C.chiefsRed,number:'38',pose:'crouching'},
+    {wx:-20,wy:38,color:C.chiefsRed,number:'22',pose:'standing'},
+    {wx:20,wy:38,color:C.chiefsRed,number:'10',pose:'standing'},
+    {wx:0,wy:45,color:C.chiefsRed,number:'32',pose:'standing'},
+    {wx:15,wy:50,color:C.chiefsRed,number:'4',pose:'standing'},
+  ]
+};
+
+// Animated player state for scenes
+let animPlayers = [];
+
+function lerpPlayers(from, to, t) {
+  return from.map((p,i) => {
+    if(!to[i]) return p;
+    return {
+      ...p,
+      wx: p.wx + (to[i].wx - p.wx) * t,
+      wy: p.wy + (to[i].wy - p.wy) * t,
+      pose: t > 0.5 ? (to[i].pose || p.pose) : p.pose
+    };
+  });
+}
+
+// ==================== SCENE DEFINITIONS ====================
+
+const scenes = {
+  // Scene 1: Title Card
+  title: {
+    duration: 5000,
+    enter() {
+      state.lightIntensity = 0;
+      state.letterbox = 0.08;
+      document.getElementById('title-overlay').style.opacity = '0';
+    },
+    update(dt, elapsed) {
+      // Lights flicker on one by one
+      const t = elapsed / this.duration;
+      if(t > 0.1) state.lightIntensity = Math.min(1, (t-0.1)*3);
+
+      // Title fade in
+      if(t > 0.4) {
+        document.getElementById('title-overlay').style.opacity = String(Math.min(1,(t-0.4)*3));
+      }
+    },
+    render(ctx, t) {
+      drawSky(ctx, t);
+      drawBuildings(ctx, t);
+      drawCourt(ctx, camera, t, state.lightIntensity);
+      drawFences(ctx, camera, t, 0, 0);
+      drawVolumetricLights(ctx, t, state.lightIntensity);
+      drawDust(ctx, t);
+    }
+  },
+
+  // Scene 2: Court Reveal
+  courtReveal: {
+    duration: 6000,
+    enter() {
+      document.getElementById('title-overlay').style.opacity = '0';
+      state.lightIntensity = 1;
+      state.letterbox = 0.06;
+      camera.targetZoom = 1.3; // start zoomed in (ground level)
+    },
+    update(dt, elapsed) {
+      const t = elapsed / this.duration;
+      // Camera cranes up
+      camera.targetZoom = 1.3 - t * 0.35;
+      camera.targetY = -100 + t * 100;
+      state.letterbox = 0.06 * (1-t);
+      // Crowd fades in
+      state.crowdExcitement = t * 0.2;
+    },
+    render(ctx, t) {
+      drawSky(ctx, t);
+      drawBuildings(ctx, t);
+      drawCourt(ctx, camera, t, state.lightIntensity);
+      drawCrowd(ctx, -1, t, state.crowdExcitement);
+      drawCrowd(ctx, 1, t, state.crowdExcitement);
+      drawFences(ctx, camera, t, 0, 0);
+      drawVolumetricLights(ctx, t, state.lightIntensity);
+      drawDust(ctx, t);
+    }
+  },
+
+  // Scene 3: Play Call
+  playCall: {
+    duration: 4000,
+    enter() {
+      state.letterbox = 0;
+      camera.targetZoom = 1.1;
+      document.getElementById('score-bug').style.opacity = '1';
+      document.getElementById('style-gauge').style.opacity = '1';
+      state.bufScore = 14; state.kcScore = 7;
+      state.stylePoints = 32; state.gbPercent = 55;
+      document.getElementById('buf-score').textContent = '14';
+      document.getElementById('kc-score').textContent = '7';
+      document.getElementById('quarter').textContent = 'Q2';
+      document.getElementById('clock').textContent = '1:34';
+    },
+    update(dt, elapsed) {
+      const t = elapsed / this.duration;
+      drawStyleGauge(state.gbPercent, state.stylePoints, globalTime);
+    },
+    render(ctx, t) {
+      drawSky(ctx, t);
+      drawBuildings(ctx, t);
+      drawCourt(ctx, camera, t, state.lightIntensity);
+      drawPlayCall(ctx, t, 0, elapsed/this.duration * 2); // selected play 0, drawing in
+      drawCrowd(ctx, -1, t, 0.1);
+      drawCrowd(ctx, 1, t, 0.1);
+      drawFences(ctx, camera, t, 0, 0);
+      drawVolumetricLights(ctx, t, state.lightIntensity);
+      drawDust(ctx, t);
+    }
+  },
+
+  // Scene 4: Line of Scrimmage
+  lineUp: {
+    duration: 4000,
+    enter() {
+      camera.targetZoom = 1.0;
+      animPlayers = JSON.parse(JSON.stringify(playerConfigs.line));
+      state.letterbox = 0.04;
+    },
+    update(dt, elapsed) {
+      const t = elapsed / this.duration;
+      camera.targetY = -5 + t*5;
+      state.letterbox = 0.04 * (1-t);
+      drawStyleGauge(state.gbPercent, state.stylePoints, globalTime);
+    },
+    render(ctx, t) {
+      drawSky(ctx, t);
+      drawBuildings(ctx, t);
+      drawCourt(ctx, camera, t, state.lightIntensity);
+      // Draw players
+      animPlayers.sort((a,b) => a.wy - b.wy); // depth sort
+      animPlayers.forEach(p => {
+        const sp = worldToScreen(p.wx, p.wy);
+        const s = scaleAtDepth(p.wy);
+        drawPlayer(ctx, sp.x + camera.shakeX, sp.y + camera.shakeY, s, p);
+      });
+      drawCrowd(ctx, -1, t, 0.15);
+      drawCrowd(ctx, 1, t, 0.15);
+      drawFences(ctx, camera, t, 0, 0);
+      drawVolumetricLights(ctx, t, state.lightIntensity);
+      drawDust(ctx, t);
+    }
+  },
+
+  // Scene 5: Play Develops (snap, throw, catch)
+  playDevelops: {
+    duration: 5000,
+    enter() {
+      animPlayers = JSON.parse(JSON.stringify(playerConfigs.line));
+      camera.targetZoom = 0.98;
+    },
+    update(dt, elapsed) {
+      const t = elapsed / this.duration;
+
+      // QB drops back
+      if(t < 0.3) {
+        animPlayers[0].wy = 30 - t*30; // QB moves back
+        animPlayers[0].pose = 'running';
+        animPlayers[0].hasBall = true;
+      }
+
+      // Receivers run routes
+      if(t > 0.1) {
+        const rt = Math.min(1,(t-0.1)/0.6);
+        // Diggs runs slant
+        animPlayers[5].wy = 25 + rt*40;
+        animPlayers[5].wx = 20 - rt*25;
+        animPlayers[5].pose = 'running';
+        // Cook runs out
+        animPlayers[6].wy = 25 + rt*20;
+        animPlayers[6].wx = -20 - rt*10;
+        animPlayers[6].pose = 'running';
+      }
+
+      // Throw at t=0.4
+      if(t > 0.4 && t < 0.5) {
+        animPlayers[0].pose = 'standing';
+        animPlayers[0].hasBall = false;
+        // Ball in flight (drawn separately)
+      }
+
+      // Catch at t=0.6
+      if(t > 0.6) {
+        animPlayers[5].hasBall = true;
+        animPlayers[5].pose = 'running';
+        // Show style pass
+        if(t > 0.6 && t < 0.65) {
+          showActionText('+4', 'STYLE PASS', 1.0);
+          state.stylePoints = 36;
+          state.gbPercent = 60;
+        }
+      }
+
+      // Defenders react
+      if(t > 0.3) {
+        const dt2 = (t-0.3)/0.7;
+        animPlayers[10].wy = 38 + dt2*15; // DB chases
+        animPlayers[10].wx = -20 + dt2*15;
+        animPlayers[10].pose = 'running';
+        animPlayers[13].wy = 50 + dt2*10;
+        animPlayers[13].pose = 'running';
+      }
+
+      // Camera follows ball carrier
+      if(t > 0.6) {
+        const sp = worldToScreen(animPlayers[5].wx, animPlayers[5].wy);
+        camera.targetX = (sp.x - W/2) * 0.1;
+      }
+
+      drawStyleGauge(state.gbPercent, state.stylePoints, globalTime);
+    },
+    render(ctx, t) {
+      drawSky(ctx, t);
+      drawBuildings(ctx, t);
+      drawCourt(ctx, camera, t, state.lightIntensity);
+
+      // Draw ball in flight
+      const sceneT = elapsed / this.duration;
+      if(sceneT > 0.4 && sceneT < 0.6) {
+        const bt = (sceneT-0.4)/0.2;
+        const bx = animPlayers[0].wx + (animPlayers[5].wx - animPlayers[0].wx)*bt;
+        const by = animPlayers[0].wy + (animPlayers[5].wy - animPlayers[0].wy)*bt;
+        const bp = worldToScreen(bx, by);
+        const bs = scaleAtDepth(by);
+        // Ball with spiral
+        ctx.save();
+        ctx.translate(bp.x, bp.y - 15*bs);
+        ctx.rotate(bt * Math.PI * 6);
+        ctx.fillStyle = '#6B3A00';
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 5*bs, 3*bs, 0, 0, Math.PI*2);
+        ctx.fill();
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(-1*bs, -2*bs, 2*bs, 4*bs);
+        ctx.restore();
+        // Air trail
+        ctx.save();
+        ctx.globalAlpha = 0.1;
+        ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+        ctx.lineWidth = 1;
+        for(let i=0;i<3;i++){
+          const tt = bt - i*0.05;
+          if(tt < 0) continue;
+          const tx = animPlayers[0].wx + (animPlayers[5].wx - animPlayers[0].wx)*tt;
+          const ty = animPlayers[0].wy + (animPlayers[5].wy - animPlayers[0].wy)*tt;
+          const tp = worldToScreen(tx,ty);
+          ctx.beginPath();
+          ctx.arc(tp.x, tp.y-15*scaleAtDepth(ty), 3, 0, Math.PI*2);
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
+
+      animPlayers.sort((a,b) => a.wy - b.wy);
+      animPlayers.forEach(p => {
+        const sp = worldToScreen(p.wx, p.wy);
+        const s = scaleAtDepth(p.wy);
+        drawPlayer(ctx, sp.x + camera.shakeX, sp.y + camera.shakeY, s, p);
+      });
+
+      drawCrowd(ctx, -1, t, state.crowdExcitement);
+      drawCrowd(ctx, 1, t, state.crowdExcitement);
+      drawFences(ctx, camera, t, 0, 0);
+      drawVolumetricLights(ctx, t, state.lightIntensity);
+      drawDust(ctx, t);
+    }
+  },
+
+  // Scene 6: The Juke
+  juke: {
+    duration: 3000,
+    enter() {
+      // Diggs has the ball, defender closing
+      animPlayers = [
+        {wx:-5,wy:55,color:C.billsBlue,number:'14',pose:'running',hasBall:true,name:'DIGGS'},
+        {wx:-8,wy:52,color:C.chiefsRed,number:'22',pose:'running'},
+        // Other players scattered
+        {wx:10,wy:45,color:C.billsBlue,number:'73',pose:'standing'},
+        {wx:-20,wy:50,color:C.billsBlue,number:'28',pose:'running',name:'COOK'},
+        {wx:15,wy:60,color:C.chiefsRed,number:'95',pose:'running'},
+        {wx:0,wy:65,color:C.chiefsRed,number:'32',pose:'standing'},
+      ];
+      camera.targetZoom = 1.05;
+
+      // Show player tag
+      const tag = document.getElementById('player-tag');
+      tag.textContent = 'DIGGS 14';
+      tag.style.opacity = '1';
+      setTimeout(() => { tag.style.opacity = '0'; }, 2000);
+    },
+    update(dt, elapsed) {
+      const t = elapsed / this.duration;
+
+      if(t < 0.3) {
+        // Running toward each other
+        animPlayers[0].wy = 55 + t*15;
+        animPlayers[1].wy = 52 + t*18;
+        animPlayers[1].wx += dt*0.003;
+      }
+
+      // JUKE at t=0.35
+      if(t > 0.3 && t < 0.4) {
+        camera.hitch = 3; // SSX freeze!
+        animPlayers[0].pose = 'juking';
+        animPlayers[0].wx = -5 + (t-0.3)*80; // snap sideways
+      }
+
+      if(t > 0.4) {
+        animPlayers[0].pose = 'running';
+        animPlayers[0].wx = 3 + (t-0.4)*5;
+        animPlayers[0].wy = 60 + (t-0.4)*30;
+        // Defender whiffs
+        animPlayers[1].pose = 'tackled';
+        animPlayers[1].wy = 58;
+        animPlayers[1].wx = -3;
+
+        if(t > 0.4 && t < 0.45) {
+          showActionText('+3', 'JUKE', 1.2);
+          state.stylePoints = 39;
+          state.gbPercent = 65;
+          state.crowdExcitement = 0.5;
+          emitBurst(W*0.5, H*0.5, 8, {color:C.gold,size:3,life:0.8});
+        }
+      }
+
+      // Camera follows with lag
+      const sp = worldToScreen(animPlayers[0].wx, animPlayers[0].wy);
+      camera.targetX = (sp.x - W/2) * 0.15;
+
+      drawStyleGauge(state.gbPercent, state.stylePoints, globalTime);
+    },
+    render(ctx, t) {
+      drawSky(ctx, t);
+      drawBuildings(ctx, t);
+      drawCourt(ctx, camera, t, state.lightIntensity);
+      animPlayers.sort((a,b) => a.wy - b.wy);
+      animPlayers.forEach(p => {
+        const sp = worldToScreen(p.wx, p.wy);
+        const s = scaleAtDepth(p.wy);
+        drawPlayer(ctx, sp.x + camera.shakeX, sp.y + camera.shakeY, s, p);
+      });
+      drawCrowd(ctx, -1, t, state.crowdExcitement);
+      drawCrowd(ctx, 1, t, state.crowdExcitement);
+      drawFences(ctx, camera, t, 0, 0);
+      drawVolumetricLights(ctx, t, state.lightIntensity);
+      drawDust(ctx, t);
+    }
+  },
+
+  // Scene 7: Wall Move
+  wallMove: {
+    duration: 6000,
+    enter() {
+      animPlayers = [
+        {wx:20,wy:62,color:C.billsBlue,number:'14',pose:'running',hasBall:true,name:'DIGGS'},
+        {wx:15,wy:58,color:C.chiefsRed,number:'95',pose:'running'},
+        {wx:10,wy:60,color:C.chiefsRed,number:'38',pose:'running'},
+        {wx:-10,wy:55,color:C.billsBlue,number:'28',pose:'running',name:'COOK'},
+        {wx:0,wy:70,color:C.chiefsRed,number:'32',pose:'standing'},
+        {wx:-15,wy:65,color:C.billsBlue,number:'17',pose:'standing',name:'ALLEN'},
+      ];
+      state.fenceDeform = 0;
+      camera.targetZoom = 1.02;
+    },
+    update(dt, elapsed) {
+      const t = elapsed / this.duration;
+
+      // Approach fence
+      if(t < 0.3) {
+        animPlayers[0].wx = 20 + t*60; // toward right fence
+        animPlayers[0].wy = 62 + t*10;
+        animPlayers[1].wx = 15 + t*50;
+        animPlayers[1].wy = 58 + t*12;
+      }
+
+      // WALL MOVE at t=0.35
+      if(t > 0.3 && t < 0.5) {
+        const wt = (t-0.3)/0.2;
+        // Hit the wall
+        state.fenceDeform = Math.sin(wt*Math.PI) * 15;
+        state.fenceDeformY = 65;
+        animPlayers[0].wx = 40 - wt*30; // bounce off
+        animPlayers[0].wy = 65 + wt*5;
+        animPlayers[0].pose = 'juking';
+
+        if(wt < 0.15) {
+          shakeCamera(15);
+          emitSparks(worldToScreen(45,65).x, worldToScreen(45,65).y, 20);
+          addShockwave(worldToScreen(45,65).x, worldToScreen(45,65).y, 150, 1.5, C.gold);
+        }
+      }
+
+      if(t > 0.35 && t < 0.4) {
+        showActionText('+8 WALL MOVE', '+8 STYLE', 2.0);
+        state.stylePoints = 47;
+        state.gbPercent = 78;
+        state.crowdExcitement = 0.9;
+      }
+
+      if(t > 0.5) {
+        state.fenceDeform *= 0.95;
+        animPlayers[0].pose = 'running';
+        animPlayers[0].wx = 10 - (t-0.5)*20;
+        animPlayers[0].wy = 70 + (t-0.5)*10;
+        // Defenders in wake
+        animPlayers[1].pose = 'tackled';
+        animPlayers[2].pose = 'tackled';
+        animPlayers[2].wx = 12;
+        animPlayers[2].wy = 63;
+      }
+
+      const sp = worldToScreen(animPlayers[0].wx, animPlayers[0].wy);
+      camera.targetX = (sp.x - W/2) * 0.12;
+      drawStyleGauge(state.gbPercent, state.stylePoints, globalTime);
+    },
+    render(ctx, t) {
+      drawSky(ctx, t);
+      drawBuildings(ctx, t);
+      drawCourt(ctx, camera, t, state.lightIntensity);
+
+      animPlayers.sort((a,b) => a.wy - b.wy);
+      animPlayers.forEach(p => {
+        const sp = worldToScreen(p.wx, p.wy);
+        const s = scaleAtDepth(p.wy);
+        drawPlayer(ctx, sp.x + camera.shakeX, sp.y + camera.shakeY, s, p);
+      });
+
+      drawCrowd(ctx, -1, t, state.crowdExcitement);
+      drawCrowd(ctx, 1, t, state.crowdExcitement);
+      drawFences(ctx, camera, t, state.fenceDeformY, state.fenceDeform);
+      drawVolumetricLights(ctx, t, state.lightIntensity);
+      drawDust(ctx, t);
+
+      // Shockwaves
+      shockwaves.forEach(sw => {
+        sw.t += 0.016;
+        const p = sw.t / sw.dur;
+        if(p > 1) return;
+        sw.r = sw.maxR * p;
+        ctx.save();
+        ctx.globalAlpha = 1 - p;
+        ctx.strokeStyle = sw.color;
+        ctx.lineWidth = 3 * (1-p);
+        ctx.shadowColor = sw.color;
+        ctx.shadowBlur = 20;
+        ctx.beginPath();
+        ctx.arc(sw.x, sw.y, sw.r, 0, Math.PI*2);
+        ctx.stroke();
+        ctx.restore();
+      });
+    }
+  },
+
+  // Scene 8: Pitch Chain
+  pitchChain: {
+    duration: 5000,
+    enter() {
+      animPlayers = [
+        {wx:-5,wy:72,color:C.billsBlue,number:'14',pose:'running',hasBall:true,name:'DIGGS'},
+        {wx:-15,wy:68,color:C.billsBlue,number:'28',pose:'running',name:'COOK'},
+        {wx:-25,wy:65,color:C.billsBlue,number:'17',pose:'running',name:'ALLEN'},
+        {wx:10,wy:75,color:C.chiefsRed,number:'32',pose:'running'},
+        {wx:5,wy:70,color:C.chiefsRed,number:'22',pose:'running'},
+        {wx:-10,wy:78,color:C.chiefsRed,number:'38',pose:'running'},
+      ];
+      state.crowdExcitement = 0.5;
+    },
+    update(dt, elapsed) {
+      const t = elapsed / this.duration;
+
+      // Move everyone upfield
+      animPlayers.forEach(p => { p.wy += dt * 0.005; });
+
+      // Pitch 1 at t=0.15
+      if(t > 0.15 && t < 0.2) {
+        animPlayers[0].hasBall = false;
+        animPlayers[1].hasBall = true;
+        showActionText('+4 PITCH', '', 0.8);
+        state.stylePoints = 51;
+        state.gbPercent = 82;
+      }
+
+      // Pitch 2 at t=0.4
+      if(t > 0.4 && t < 0.45) {
+        animPlayers[1].hasBall = false;
+        animPlayers[2].hasBall = true;
+        showActionText('+4 PITCH x2', '', 0.8);
+        state.stylePoints = 55;
+        state.gbPercent = 88;
+        shakeCamera(4);
+      }
+
+      // Pitch 3 at t=0.65
+      if(t > 0.65 && t < 0.7) {
+        animPlayers[2].hasBall = false;
+        animPlayers[1].hasBall = true;
+        showActionText('+4 PITCH x3', 'ON FIRE', 1.2);
+        state.stylePoints = 59;
+        state.gbPercent = 94;
+        shakeCamera(8);
+        emitBurst(W/2, H/2, 15, {color:'#FF8000',size:4,life:1,blend:'lighter'});
+        state.crowdExcitement = 0.8;
+      }
+
+      drawStyleGauge(state.gbPercent, state.stylePoints, globalTime);
+    },
+    render(ctx, t) {
+      drawSky(ctx, t);
+      drawBuildings(ctx, t);
+      // Intensifying light
+      const intensity = state.lightIntensity + state.gbPercent/100 * 0.3;
+      drawCourt(ctx, camera, t, intensity);
+      animPlayers.sort((a,b) => a.wy - b.wy);
+      animPlayers.forEach(p => {
+        const sp = worldToScreen(p.wx, p.wy);
+        const s = scaleAtDepth(p.wy);
+        drawPlayer(ctx, sp.x + camera.shakeX, sp.y + camera.shakeY, s, p);
+      });
+      drawCrowd(ctx, -1, t, state.crowdExcitement);
+      drawCrowd(ctx, 1, t, state.crowdExcitement);
+      drawFences(ctx, camera, t, 0, 0);
+      drawVolumetricLights(ctx, t, intensity);
+      drawDust(ctx, t);
+    }
+  },
+
+  // Scene 9: Touchdown
+  touchdown: {
+    duration: 4500,
+    enter() {
+      animPlayers = [
+        {wx:-10,wy:82,color:C.billsBlue,number:'28',pose:'running',hasBall:true,name:'COOK'},
+        {wx:5,wy:78,color:C.chiefsRed,number:'32',pose:'running'},
+        {wx:-15,wy:75,color:C.billsBlue,number:'14',pose:'running',name:'DIGGS'},
+        {wx:10,wy:80,color:C.chiefsRed,number:'22',pose:'running'},
+      ];
+      camera.targetZoom = 1.0;
+    },
+    update(dt, elapsed) {
+      const t = elapsed / this.duration;
+
+      if(t < 0.3) {
+        // Sprint to endzone
+        animPlayers[0].wy = 82 + t*50;
+        animPlayers[0].pose = 'running';
+        // Slow-mo at t=0.25
+        if(t > 0.2) {
+          state.letterbox = 0.05;
+        }
+      }
+
+      // Cross goal line
+      if(t > 0.3 && t < 0.4) {
+        // Camera rush forward
+        camera.targetY = 30;
+        camera.targetZoom = 1.15;
+        animPlayers[0].pose = 'celebrating';
+        animPlayers[0].wy = 93;
+        animPlayers[0].wx = -5;
+
+        if(t > 0.3 && t < 0.35) {
+          showActionText('+15 TOUCHDOWN', 'BUFFALO BILLS', 2.5);
+          state.bufScore = 21;
+          document.getElementById('buf-score').textContent = '21';
+          state.stylePoints = 74;
+          state.gbPercent = 100;
+          shakeCamera(12);
+          // Gold particle explosion
+          emitBurst(W/2, H*0.4, 40, {color:C.gold,size:5,life:2,speed:4,blend:'lighter'});
+          emitBurst(W/2, H*0.4, 20, {color:'#fff',size:3,life:1.5,speed:3,blend:'lighter'});
+          state.crowdExcitement = 1.0;
+        }
+      }
+
+      if(t > 0.5) {
+        // Camera swings around
+        camera.targetX = Math.sin((t-0.5)*3) * 30;
+        camera.targetZoom = 1.1 - (t-0.5)*0.2;
+        state.letterbox = 0.05 * (1 - (t-0.5)*2);
+      }
+
+      drawStyleGauge(state.gbPercent, state.stylePoints, globalTime);
+    },
+    render(ctx, t) {
+      drawSky(ctx, t);
+      drawBuildings(ctx, t);
+      const intensity = 1 + state.gbPercent/100 * 0.4;
+      drawCourt(ctx, camera, t, intensity);
+      animPlayers.sort((a,b) => a.wy - b.wy);
+      animPlayers.forEach(p => {
+        const sp = worldToScreen(p.wx, p.wy);
+        const s = scaleAtDepth(p.wy);
+        drawPlayer(ctx, sp.x + camera.shakeX, sp.y + camera.shakeY, s, p);
+      });
+      drawCrowd(ctx, -1, t, state.crowdExcitement);
+      drawCrowd(ctx, 1, t, state.crowdExcitement);
+      drawFences(ctx, camera, t, 0, 0);
+      drawVolumetricLights(ctx, t, intensity);
+      drawDust(ctx, t);
+    }
+  },
+
+  // Scene 10: GameBreaker Activation
+  gameBreaker: {
+    duration: 6000,
+    enter() {
+      animPlayers = [
+        {wx:0,wy:35,color:C.billsBlue,number:'17',pose:'standing',hasBall:true,name:'ALLEN',gbActive:false},
+        {wx:-15,wy:30,color:C.billsBlue,number:'14',pose:'standing',name:'DIGGS'},
+        {wx:15,wy:30,color:C.billsBlue,number:'28',pose:'standing',name:'COOK'},
+        {wx:-5,wy:40,color:C.chiefsRed,number:'95',pose:'standing'},
+        {wx:10,wy:42,color:C.chiefsRed,number:'55',pose:'standing'},
+        {wx:0,wy:50,color:C.chiefsRed,number:'32',pose:'standing'},
+        {wx:-15,wy:48,color:C.chiefsRed,number:'22',pose:'standing'},
+      ];
+      camera.targetZoom = 1.0;
+      camera.targetX = 0;
+      camera.targetY = 0;
+    },
+    update(dt, elapsed) {
+      const t = elapsed / this.duration;
+
+      // TIME STOPS (0-0.1)
+      if(t < 0.1) {
+        // Freeze everything
+        state.letterbox = 0.08;
+      }
+
+      // Camera pulls back (0.1-0.25)
+      if(t > 0.1 && t < 0.25) {
+        camera.targetZoom = 1.0 - (t-0.1)*3; // zoom out
+        animPlayers[0].pose = 'celebrating'; // power stance
+      }
+
+      // Energy wave (0.25-0.5)
+      if(t > 0.25 && t < 0.3) {
+        const wp = worldToScreen(animPlayers[0].wx, animPlayers[0].wy);
+        addShockwave(wp.x, wp.y, 400, 2, C.gold);
+        addShockwave(wp.x, wp.y, 300, 1.5, '#FFE080');
+        emitBurst(wp.x, wp.y, 50, {color:C.gold,size:6,life:2,speed:6,blend:'lighter'});
+        shakeCamera(20);
+        state.lightIntensity = 1.8; // hot amber
+      }
+
+      // Camera slams back (0.4-0.5)
+      if(t > 0.4 && t < 0.5) {
+        camera.targetZoom = 1.05;
+        state.letterbox = 0;
+      }
+
+      // Supercharged play (0.5-1.0)
+      if(t > 0.5) {
+        animPlayers[0].gbActive = true;
+        animPlayers[0].pose = 'running';
+        animPlayers[0].wy = 35 + (t-0.5)*120;
+        animPlayers[0].wx = Math.sin((t-0.5)*8)*15;
+
+        // Fire trails
+        if(Math.random() > 0.5) {
+          const sp = worldToScreen(animPlayers[0].wx, animPlayers[0].wy);
+          emitBurst(sp.x, sp.y, 2, {color:'#FF8020',size:4,life:0.5,speed:1,blend:'lighter',gravity:50});
+        }
+
+        // Defenders in slow motion
+        animPlayers.slice(3).forEach((d,i) => {
+          d.wy += dt * 0.002; // slow
+          d.pose = 'running';
+        });
+
+        // Juke through at t=0.7
+        if(t > 0.7 && t < 0.72) {
+          camera.hitch = 2;
+          shakeCamera(6);
+          showActionText('GAMEBREAKER', 'UNSTOPPABLE', 1.5);
+        }
+
+        // TD at t=0.9
+        if(t > 0.88 && t < 0.9) {
+          animPlayers[0].pose = 'celebrating';
+          showActionText('+15 TOUCHDOWN', 'GAMEBREAKER TD', 2.0);
+          state.bufScore = 28;
+          document.getElementById('buf-score').textContent = '28';
+          shakeCamera(15);
+          emitBurst(W/2, H*0.35, 60, {color:C.gold,size:6,life:2.5,speed:5,blend:'lighter'});
+          state.crowdExcitement = 1;
+        }
+      }
+
+      state.lightIntensity = t > 0.25 ? Math.max(1, state.lightIntensity * 0.995) : 1;
+      drawStyleGauge(100, state.stylePoints, globalTime);
+    },
+    render(ctx, t) {
+      drawSky(ctx, t);
+      drawBuildings(ctx, t);
+      const intensity = state.lightIntensity;
+      drawCourt(ctx, camera, t, intensity);
+
+      // Golden wash during GB
+      const sceneT = elapsed / this.duration;
+      if(sceneT > 0.25) {
+        ctx.save();
+        ctx.globalCompositeOperation = 'lighter';
+        ctx.globalAlpha = Math.min(0.1, (sceneT-0.25)*0.3);
+        ctx.fillStyle = '#E8A040';
+        ctx.fillRect(0,0,W,H);
+        ctx.restore();
+      }
+
+      animPlayers.sort((a,b) => a.wy - b.wy);
+      animPlayers.forEach(p => {
+        const sp = worldToScreen(p.wx, p.wy);
+        const s = scaleAtDepth(p.wy);
+        drawPlayer(ctx, sp.x + camera.shakeX, sp.y + camera.shakeY, s, p);
+      });
+
+      drawCrowd(ctx, -1, t, state.crowdExcitement);
+      drawCrowd(ctx, 1, t, state.crowdExcitement);
+      drawFences(ctx, camera, t, 0, 0);
+      drawVolumetricLights(ctx, t, intensity);
+      drawDust(ctx, t);
+
+      // Shockwaves
+      shockwaves.forEach(sw => {
+        sw.t += 0.016;
+        const p = sw.t / sw.dur;
+        if(p > 1) return;
+        sw.r = sw.maxR * p;
+        ctx.save();
+        ctx.globalAlpha = (1 - p) * 0.8;
+        ctx.strokeStyle = sw.color;
+        ctx.lineWidth = 4 * (1-p);
+        ctx.shadowColor = sw.color;
+        ctx.shadowBlur = 30;
+        ctx.beginPath();
+        ctx.arc(sw.x, sw.y, sw.r, 0, Math.PI*2);
+        ctx.stroke();
+        ctx.restore();
+      });
+
+      // Speed blur during GB
+      if(sceneT > 0.5) {
+        ctx.save();
+        ctx.globalAlpha = 0.1;
+        const blurGrd = ctx.createRadialGradient(W/2,H/2,W*0.3,W/2,H/2,W*0.7);
+        blurGrd.addColorStop(0, 'transparent');
+        blurGrd.addColorStop(1, 'rgba(255,180,40,0.15)');
+        ctx.fillStyle = blurGrd;
+        ctx.fillRect(0,0,W,H);
+        ctx.restore();
+      }
+    }
+  },
+
+  // Scene 11: End Card
+  endCard: {
+    duration: 6000,
+    enter() {
+      camera.targetZoom = 1;
+      camera.targetX = 0;
+      camera.targetY = 0;
+      state.letterbox = 0.08;
+      document.getElementById('score-bug').style.opacity = '0';
+      document.getElementById('style-gauge').style.opacity = '0';
+    },
+    update(dt, elapsed) {
+      const t = elapsed / this.duration;
+      if(t > 0.3) {
+        document.getElementById('end-overlay').style.opacity = String(Math.min(1,(t-0.3)*2));
+      }
+      // Fade to black
+      if(t > 0.8) {
+        state.fadeOut = (t-0.8)*5;
+      }
+    },
+    render(ctx, t) {
+      // Fade from gameplay to black
+      const sceneT = elapsed / this.duration;
+      if(sceneT < 0.5) {
+        drawSky(ctx, t);
+        drawBuildings(ctx, t);
+        drawCourt(ctx, camera, t, state.lightIntensity * (1-sceneT*2));
+        drawFences(ctx, camera, t, 0, 0);
+        drawVolumetricLights(ctx, t, state.lightIntensity * (1-sceneT*2));
+      }
+      // Dark overlay
+      ctx.fillStyle = `rgba(0,0,0,${Math.min(1,sceneT*1.5)})`;
+      ctx.fillRect(0,0,W,H);
+      // Warm amber afterglow
+      if(sceneT > 0.5) {
+        ctx.save();
+        ctx.globalCompositeOperation = 'lighter';
+        const glowA = Math.sin((sceneT-0.5)*Math.PI) * 0.05;
+        ctx.fillStyle = `rgba(232,160,64,${glowA})`;
+        ctx.fillRect(0,0,W,H);
+        ctx.restore();
+      }
+      drawDust(ctx, t);
+    }
+  }
+};
+
+// ==================== MAIN LOOP ====================
+
+const sceneOrder = ['title','courtReveal','playCall','lineUp','playDevelops','juke','wallMove','pitchChain','touchdown','gameBreaker','endCard'];
+let currentSceneIndex = -1;
+let elapsed = 0;
+let lastTime = 0;
+
+function nextScene() {
+  currentSceneIndex++;
+  if(currentSceneIndex >= sceneOrder.length) {
+    // Loop back
+    currentSceneIndex = 0;
+    state.bufScore = 0; state.kcScore = 7;
+    state.stylePoints = 0; state.gbPercent = 0;
+    document.getElementById('buf-score').textContent = '0';
+    document.getElementById('end-overlay').style.opacity = '0';
+  }
+  const sceneName = sceneOrder[currentSceneIndex];
+  currentScene = sceneName;
+  elapsed = 0;
+  const scene = scenes[sceneName];
+  if(scene.enter) scene.enter();
+}
+
+function gameLoop(timestamp) {
+  if(!lastTime) lastTime = timestamp;
+  const dt = Math.min(33, timestamp - lastTime); // cap at 30fps minimum
+  lastTime = timestamp;
+  globalTime = timestamp;
+
+  if(!started) {
+    // Title screen waiting
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0,0,W,H);
+    drawSky(ctx, timestamp);
+    drawBuildings(ctx, timestamp);
+    // Subtle light on/off
+    const li = 0.3 + Math.sin(timestamp*0.001)*0.1;
+    drawCourt(ctx, camera, timestamp, li);
+    drawVolumetricLights(ctx, timestamp, li);
+    drawDust(ctx, timestamp);
+    applyBloom(ctx);
+    applyColorGrading(ctx);
+    applyFilmGrain(timestamp);
+    document.getElementById('title-overlay').style.opacity = '1';
+    requestAnimationFrame(gameLoop);
+    return;
+  }
+
+  if(currentScene === 'waiting') {
+    nextScene();
+  }
+
+  const scene = scenes[currentScene];
+  elapsed += dt;
+
+  // Auto-advance
+  if(elapsed >= scene.duration) {
+    nextScene();
+    elapsed = 0;
+  }
+
+  // Update
+  const dtSec = dt / 1000;
+  updateCamera(dt);
+  scene.update(dtSec, elapsed);
+  updateActionText(dtSec);
+
+  // Update particles
+  particles.forEach(p => p.update(dtSec));
+  // Remove dead particles
+  for(let i=particles.length-1;i>=0;i--){
+    if(particles[i].life<=0) particles.splice(i,1);
+  }
+  // Remove old shockwaves
+  for(let i=shockwaves.length-1;i>=0;i--){
+    if(shockwaves[i].t > shockwaves[i].dur) shockwaves.splice(i,1);
+  }
+
+  // Render
+  ctx.save();
+  // Camera transform
+  ctx.translate(W/2, H/2);
+  ctx.scale(camera.zoom, camera.zoom);
+  ctx.translate(-W/2 + camera.x + camera.shakeX, -H/2 + camera.y + camera.shakeY);
+
+  // Clear
+  ctx.fillStyle = '#000';
+  ctx.fillRect(-100,-100,W+200,H+200);
+
+  scene.render(ctx, timestamp);
+
+  // Draw particles
+  particles.forEach(p => p.draw(ctx));
+
+  ctx.restore();
+
+  // Post-processing (applied to final canvas, not transformed)
+  applyBloom(ctx);
+  applyChromaticAberration(ctx, Math.abs(camera.shakeX) + Math.abs(camera.shakeY));
+  applyColorGrading(ctx);
+  applyFilmGrain(timestamp);
+
+  // Letterbox
+  const lbh = state.letterbox * H;
+  document.getElementById('letterbox-top').style.height = lbh + 'px';
+  document.getElementById('letterbox-bottom').style.height = lbh + 'px';
+
+  // Fade out
+  if(state.fadeOut) {
+    ctx.fillStyle = `rgba(0,0,0,${Math.min(1,state.fadeOut)})`;
+    ctx.fillRect(0,0,W,H);
+  }
+
+  // Player tag positioning
+  if(animPlayers.length > 0) {
+    const bp = animPlayers.find(p => p.hasBall);
+    if(bp) {
+      const sp = worldToScreen(bp.wx, bp.wy);
+      const tag = document.getElementById('player-tag');
+      tag.style.left = (sp.x * canvas.offsetWidth/W + canvas.offsetLeft) + 'px';
+      tag.style.top = (sp.y * canvas.offsetHeight/H + canvas.offsetTop - 30) + 'px';
+    }
+  }
+
+  requestAnimationFrame(gameLoop);
+}
+
+// ==================== INITIALIZATION ====================
+
+// Generate textures
+generateConcrete();
+
+// Resize handler
+function resize() {
+  const aspect = W/H;
+  let cw = window.innerWidth;
+  let ch = window.innerHeight;
+  if(cw/ch > aspect) { cw = ch * aspect; }
+  else { ch = cw / aspect; }
+  canvas.style.width = cw + 'px';
+  canvas.style.height = ch + 'px';
+  // Scale HUD
+  const hud = document.getElementById('hud');
+  hud.style.width = cw + 'px';
+  hud.style.height = ch + 'px';
+  hud.style.left = ((window.innerWidth - cw)/2) + 'px';
+  hud.style.top = ((window.innerHeight - ch)/2) + 'px';
+  // Scale overlays
+  ['letterbox-top','letterbox-bottom','grain','vignette','title-overlay','end-overlay'].forEach(id => {
+    const el = document.getElementById(id);
+    el.style.width = cw + 'px';
+    el.style.height = ch + 'px';
+    el.style.left = ((window.innerWidth - cw)/2) + 'px';
+    el.style.top = ((window.innerHeight - ch)/2) + 'px';
+  });
+}
+resize();
+window.addEventListener('resize', resize);
+
+// Start on click/keypress
+function startGame() {
+  if(!started) {
+    started = true;
+    state.fadeOut = 0;
+    document.getElementById('title-overlay').style.opacity = '0';
+    document.body.style.cursor = 'default';
+  }
+}
+document.addEventListener('click', startGame);
+document.addEventListener('keydown', startGame);
+
+// Begin render loop
+requestAnimationFrame(gameLoop);
+
+</script>
+</body>
+</html>
