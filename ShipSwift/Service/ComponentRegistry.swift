@@ -302,7 +302,7 @@ struct ComponentRegistry {
             presentation: .fullScreenCover
         )
 
-        // -- Animation (9) --
+        // -- Animation (10) --
 
         reg["before-after-slider"] = ComponentEntry(
             title: "Before / After Slider",
@@ -596,6 +596,26 @@ struct ComponentRegistry {
                 )
             },
             presentation: .push
+        )
+
+        reg["carnival-shooter"] = ComponentEntry(
+            title: "Carnival Shooter",
+            icon: "target",
+            description: "SpriteKit carnival shooting gallery with bullseye targets and score tracking",
+            preview: {
+                AnyView(
+                    SWCarnivalShooter()
+                        .frame(height: 220)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                )
+            },
+            fullView: {
+                AnyView(
+                    SWCarnivalShooter(roundDuration: 30, spawnInterval: 1.2)
+                        .ignoresSafeArea()
+                )
+            },
+            presentation: .fullScreenCover
         )
 
         // -- Chart (8) --
