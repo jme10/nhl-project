@@ -1,0 +1,274 @@
+[
+  {
+    "iteration": 0,
+    "prompt": "Minimalist wordmark \"TrueLORE\" with the O as a glowing Carolina blue portal radiating soft cream light, James Turrell gradient backdrop, Wes Anderson centered symmetry, subtle SNES pixel texture on letterforms, clean sans-serif, dark navy background, logo design",
+    "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 300 300\" width=\"300\" height=\"300\">\n  <rect width=\"300\" height=\"300\" fill=\"hsl(224, 30%, 11%)\" rx=\"12\"/>\n  <rect x=\"217\" y=\"235\" width=\"2\" height=\"2\" fill=\"#fffdeb\" opacity=\"0.08\"/><rect x=\"268\" y=\"227\" width=\"4\" height=\"4\" fill=\"#fffdeb\" opacity=\"0.15\"/><rect x=\"203\" y=\"131\" width=\"3\" height=\"3\" fill=\"#fffdeb\" opacity=\"0.08\"/>\n  <defs>\n    <radialGradient id=\"glow0\">\n      <stop offset=\"0%\" stop-color=\"rgb(74,144,226)\" stop-opacity=\"0.3\"/>\n      <stop offset=\"60%\" stop-color=\"rgb(255,253,235)\" stop-opacity=\"0.12\"/>\n      <stop offset=\"100%\" stop-color=\"rgb(255,253,235)\" stop-opacity=\"0\"/>\n    </radialGradient>\n    <radialGradient id=\"portal0\">\n      <stop offset=\"0%\" stop-color=\"rgb(74,144,226)\"/>\n      <stop offset=\"100%\" stop-color=\"rgb(255,253,235)\"/>\n    </radialGradient>\n  </defs>\n  <circle cx=\"150\" cy=\"140\" r=\"30\" fill=\"url(#glow0)\"/>\n  <circle cx=\"150\" cy=\"140\" r=\"28\" fill=\"url(#portal0)\" opacity=\"0.9\"/>\n  <circle cx=\"150\" cy=\"140\" r=\"20\" fill=\"hsl(224, 30%, 11%)\" opacity=\"0.5\"/>\n  <text x=\"150\" y=\"148\" text-anchor=\"middle\" fill=\"white\" font-family=\"SF Pro Display, Helvetica Neue, Arial, sans-serif\"\n        font-size=\"36\" font-weight=\"300\" letter-spacing=\"8\">\n    True<tspan fill=\"rgb(74,144,226)\" font-weight=\"600\">L</tspan><tspan font-weight=\"600\" fill=\"rgb(255,253,235)\">O</tspan><tspan fill=\"rgb(74,144,226)\" font-weight=\"600\">RE</tspan>\n  </text>\n  <text x=\"150\" y=\"240\" text-anchor=\"middle\" fill=\"rgba(255,255,255,0.25)\" font-family=\"monospace\" font-size=\"9\">\n    iteration 0 \u00b7 score 5.36\n  </text>\n</svg>",
+    "score": 5.36,
+    "badge": "",
+    "critiques": [
+      {
+        "agent": "Apple",
+        "score": 5.6,
+        "feedback": "Too many elements competing for attention. Simplify."
+      },
+      {
+        "agent": "ArtDirector",
+        "score": 5.0,
+        "feedback": "Typography needs more breathing room. Kerning is tight on the 'LO' pair."
+      },
+      {
+        "agent": "Turrell",
+        "score": 5.3,
+        "feedback": "The light feels applied, not emanated. It should come from within."
+      },
+      {
+        "agent": "Retro",
+        "score": 5.2,
+        "feedback": "The pixel grid is too subtle \u2014 I can barely see the SNES influence."
+      },
+      {
+        "agent": "Critic",
+        "score": 5.7,
+        "feedback": "Mediocre. I've seen a hundred glowing-letter logos. Where's the soul?"
+      }
+    ]
+  },
+  {
+    "iteration": 1,
+    "prompt": "\"TrueLORE\" logotype, the O is a luminous circular portal emitting Carolina blue and warm cream rays, Turrell-inspired ambient light halo, perfectly symmetrical Wes Anderson framing, fine 16-bit pixel grid overlay, Apple-level simplicity, matte black background, vector logo",
+    "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 300 300\" width=\"300\" height=\"300\">\n  <rect width=\"300\" height=\"300\" fill=\"hsl(224, 30%, 11%)\" rx=\"12\"/>\n  <rect x=\"57\" y=\"112\" width=\"5\" height=\"5\" fill=\"#fffdeb\" opacity=\"0.09\"/><rect x=\"118\" y=\"138\" width=\"5\" height=\"5\" fill=\"#fffdeb\" opacity=\"0.09\"/><rect x=\"227\" y=\"184\" width=\"5\" height=\"5\" fill=\"#fffdeb\" opacity=\"0.15\"/><rect x=\"262\" y=\"89\" width=\"5\" height=\"5\" fill=\"#fffdeb\" opacity=\"0.11\"/>\n  <defs>\n    <radialGradient id=\"glow1\">\n      <stop offset=\"0%\" stop-color=\"rgb(74,144,226)\" stop-opacity=\"0.36\"/>\n      <stop offset=\"60%\" stop-color=\"rgb(255,253,235)\" stop-opacity=\"0.14\"/>\n      <stop offset=\"100%\" stop-color=\"rgb(255,253,235)\" stop-opacity=\"0\"/>\n    </radialGradient>\n    <radialGradient id=\"portal1\">\n      <stop offset=\"0%\" stop-color=\"rgb(74,144,226)\"/>\n      <stop offset=\"100%\" stop-color=\"rgb(255,253,235)\"/>\n    </radialGradient>\n  </defs>\n  <circle cx=\"150\" cy=\"140\" r=\"35\" fill=\"url(#glow1)\"/>\n  <circle cx=\"150\" cy=\"140\" r=\"29\" fill=\"url(#portal1)\" opacity=\"0.9\"/>\n  <circle cx=\"150\" cy=\"140\" r=\"21\" fill=\"hsl(224, 30%, 11%)\" opacity=\"0.5\"/>\n  <text x=\"150\" y=\"148\" text-anchor=\"middle\" fill=\"white\" font-family=\"SF Pro Display, Helvetica Neue, Arial, sans-serif\"\n        font-size=\"36\" font-weight=\"300\" letter-spacing=\"7\">\n    True<tspan fill=\"rgb(74,144,226)\" font-weight=\"600\">L</tspan><tspan font-weight=\"600\" fill=\"rgb(255,253,235)\">O</tspan><tspan fill=\"rgb(74,144,226)\" font-weight=\"600\">RE</tspan>\n  </text>\n  <text x=\"150\" y=\"240\" text-anchor=\"middle\" fill=\"rgba(255,255,255,0.25)\" font-family=\"monospace\" font-size=\"9\">\n    iteration 1 \u00b7 score 5.86\n  </text>\n</svg>",
+    "score": 5.86,
+    "badge": "",
+    "critiques": [
+      {
+        "agent": "Apple",
+        "score": 6.1,
+        "feedback": "Getting cleaner. The portal glow is nice but the pixel texture fights the minimalism."
+      },
+      {
+        "agent": "ArtDirector",
+        "score": 6.3,
+        "feedback": "Better spacing. The symmetry is landing but the baseline feels heavy."
+      },
+      {
+        "agent": "Turrell",
+        "score": 5.5,
+        "feedback": "Better depth now \u2014 the gradient has real dimensionality."
+      },
+      {
+        "agent": "Retro",
+        "score": 5.9,
+        "feedback": "Better. The dithering on the portal edge reads as authentic 16-bit."
+      },
+      {
+        "agent": "Critic",
+        "score": 5.5,
+        "feedback": "Improving but still generic. The Turrell reference is surface-level."
+      }
+    ]
+  },
+  {
+    "iteration": 2,
+    "prompt": "Iconic \"TrueLORE\" logo, glowing portal O with Carolina blue core fading to cream edges, Turrell light installation feel, retro SNES pixel grid at micro scale, Wes Anderson pastel accents, geometric balance, ultra-clean, dark slate background",
+    "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 300 300\" width=\"300\" height=\"300\">\n  <rect width=\"300\" height=\"300\" fill=\"hsl(224, 30%, 12%)\" rx=\"12\"/>\n  <rect x=\"93\" y=\"254\" width=\"4\" height=\"4\" fill=\"#fffdeb\" opacity=\"0.1\"/><rect x=\"127\" y=\"33\" width=\"4\" height=\"4\" fill=\"#fffdeb\" opacity=\"0.08\"/><rect x=\"131\" y=\"27\" width=\"4\" height=\"4\" fill=\"#fffdeb\" opacity=\"0.16\"/><rect x=\"262\" y=\"194\" width=\"2\" height=\"2\" fill=\"#fffdeb\" opacity=\"0.1\"/><rect x=\"209\" y=\"162\" width=\"2\" height=\"2\" fill=\"#fffdeb\" opacity=\"0.15\"/><rect x=\"203\" y=\"135\" width=\"3\" height=\"3\" fill=\"#fffdeb\" opacity=\"0.15\"/>\n  <defs>\n    <radialGradient id=\"glow2\">\n      <stop offset=\"0%\" stop-color=\"rgb(74,144,226)\" stop-opacity=\"0.41\"/>\n      <stop offset=\"60%\" stop-color=\"rgb(255,253,235)\" stop-opacity=\"0.17\"/>\n      <stop offset=\"100%\" stop-color=\"rgb(255,253,235)\" stop-opacity=\"0\"/>\n    </radialGradient>\n    <radialGradient id=\"portal2\">\n      <stop offset=\"0%\" stop-color=\"rgb(74,144,226)\"/>\n      <stop offset=\"100%\" stop-color=\"rgb(255,253,235)\"/>\n    </radialGradient>\n  </defs>\n  <circle cx=\"150\" cy=\"140\" r=\"41\" fill=\"url(#glow2)\"/>\n  <circle cx=\"150\" cy=\"140\" r=\"31\" fill=\"url(#portal2)\" opacity=\"0.9\"/>\n  <circle cx=\"150\" cy=\"140\" r=\"23\" fill=\"hsl(224, 30%, 12%)\" opacity=\"0.5\"/>\n  <text x=\"150\" y=\"148\" text-anchor=\"middle\" fill=\"white\" font-family=\"SF Pro Display, Helvetica Neue, Arial, sans-serif\"\n        font-size=\"36\" font-weight=\"300\" letter-spacing=\"6\">\n    True<tspan fill=\"rgb(74,144,226)\" font-weight=\"600\">L</tspan><tspan font-weight=\"600\" fill=\"rgb(255,253,235)\">O</tspan><tspan fill=\"rgb(74,144,226)\" font-weight=\"600\">RE</tspan>\n  </text>\n  <text x=\"150\" y=\"240\" text-anchor=\"middle\" fill=\"rgba(255,255,255,0.25)\" font-family=\"monospace\" font-size=\"9\">\n    iteration 2 \u00b7 score 6.2\n  </text>\n</svg>",
+    "score": 6.2,
+    "badge": "",
+    "critiques": [
+      {
+        "agent": "Apple",
+        "score": 6.1,
+        "feedback": "Strong restraint here. The O portal reads clearly at small sizes."
+      },
+      {
+        "agent": "ArtDirector",
+        "score": 6.4,
+        "feedback": "Composition is solid. The portal O anchors the wordmark well."
+      },
+      {
+        "agent": "Turrell",
+        "score": 5.9,
+        "feedback": "The blue-to-cream transition is getting emotional. Keep pushing."
+      },
+      {
+        "agent": "Retro",
+        "score": 6.1,
+        "feedback": "Clean pixel work. It honors the aesthetic without being costumey."
+      },
+      {
+        "agent": "Critic",
+        "score": 6.5,
+        "feedback": "Now we're getting somewhere. The portal O actually means something."
+      }
+    ]
+  },
+  {
+    "iteration": 3,
+    "prompt": "\"TrueLORE\" brand mark, portal O emits volumetric Carolina blue light with cream bloom, deep Turrell color field gradient behind text, pixel-perfect SNES-era detailing on serifs, Wes Anderson symmetry and color palette, refined and minimal",
+    "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 300 300\" width=\"300\" height=\"300\">\n  <rect width=\"300\" height=\"300\" fill=\"hsl(224, 30%, 13%)\" rx=\"12\"/>\n  <rect x=\"130\" y=\"33\" width=\"4\" height=\"4\" fill=\"#fffdeb\" opacity=\"0.08\"/><rect x=\"120\" y=\"139\" width=\"5\" height=\"5\" fill=\"#fffdeb\" opacity=\"0.11\"/><rect x=\"127\" y=\"25\" width=\"2\" height=\"2\" fill=\"#fffdeb\" opacity=\"0.15\"/><rect x=\"131\" y=\"59\" width=\"4\" height=\"4\" fill=\"#fffdeb\" opacity=\"0.14\"/><rect x=\"165\" y=\"182\" width=\"2\" height=\"2\" fill=\"#fffdeb\" opacity=\"0.06\"/><rect x=\"238\" y=\"119\" width=\"3\" height=\"3\" fill=\"#fffdeb\" opacity=\"0.05\"/><rect x=\"71\" y=\"96\" width=\"4\" height=\"4\" fill=\"#fffdeb\" opacity=\"0.06\"/><rect x=\"188\" y=\"144\" width=\"4\" height=\"4\" fill=\"#fffdeb\" opacity=\"0.1\"/>\n  <defs>\n    <radialGradient id=\"glow3\">\n      <stop offset=\"0%\" stop-color=\"rgb(74,144,226)\" stop-opacity=\"0.47\"/>\n      <stop offset=\"60%\" stop-color=\"rgb(255,253,235)\" stop-opacity=\"0.19\"/>\n      <stop offset=\"100%\" stop-color=\"rgb(255,253,235)\" stop-opacity=\"0\"/>\n    </radialGradient>\n    <radialGradient id=\"portal3\">\n      <stop offset=\"0%\" stop-color=\"rgb(74,144,226)\"/>\n      <stop offset=\"100%\" stop-color=\"rgb(255,253,235)\"/>\n    </radialGradient>\n  </defs>\n  <circle cx=\"150\" cy=\"140\" r=\"47\" fill=\"url(#glow3)\"/>\n  <circle cx=\"150\" cy=\"140\" r=\"33\" fill=\"url(#portal3)\" opacity=\"0.9\"/>\n  <circle cx=\"150\" cy=\"140\" r=\"25\" fill=\"hsl(224, 30%, 13%)\" opacity=\"0.5\"/>\n  <text x=\"150\" y=\"148\" text-anchor=\"middle\" fill=\"white\" font-family=\"SF Pro Display, Helvetica Neue, Arial, sans-serif\"\n        font-size=\"36\" font-weight=\"300\" letter-spacing=\"5\">\n    True<tspan fill=\"rgb(74,144,226)\" font-weight=\"600\">L</tspan><tspan font-weight=\"600\" fill=\"rgb(255,253,235)\">O</tspan><tspan fill=\"rgb(74,144,226)\" font-weight=\"600\">RE</tspan>\n  </text>\n  <text x=\"150\" y=\"240\" text-anchor=\"middle\" fill=\"rgba(255,255,255,0.25)\" font-family=\"monospace\" font-size=\"9\">\n    iteration 3 \u00b7 score 6.8\n  </text>\n</svg>",
+    "score": 6.8,
+    "badge": "",
+    "critiques": [
+      {
+        "agent": "Apple",
+        "score": 6.9,
+        "feedback": "Almost there \u2014 the cream bloom is slightly too warm. Cool it down."
+      },
+      {
+        "agent": "ArtDirector",
+        "score": 6.6,
+        "feedback": "Good balance. Consider slightly reducing the glow radius for print."
+      },
+      {
+        "agent": "Turrell",
+        "score": 6.9,
+        "feedback": "This has presence. The light feels like it occupies space."
+      },
+      {
+        "agent": "Retro",
+        "score": 7.2,
+        "feedback": "The retro texture and modern form are in harmony now."
+      },
+      {
+        "agent": "Critic",
+        "score": 6.4,
+        "feedback": "Solid work. A few more refinements and this escapes the forgettable zone."
+      }
+    ]
+  },
+  {
+    "iteration": 4,
+    "prompt": "Premium \"TrueLORE\" wordmark, O as radiant portal disc in Carolina blue to cream gradient, atmospheric Turrell glow, 16-bit pixel noise texture, Wes Anderson centered layout with pastel accents, Apple design language, negative space, dark background",
+    "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 300 300\" width=\"300\" height=\"300\">\n  <rect width=\"300\" height=\"300\" fill=\"hsl(224, 30%, 14%)\" rx=\"12\"/>\n  <rect x=\"37\" y=\"37\" width=\"3\" height=\"3\" fill=\"#fffdeb\" opacity=\"0.17\"/><rect x=\"221\" y=\"278\" width=\"3\" height=\"3\" fill=\"#fffdeb\" opacity=\"0.2\"/><rect x=\"158\" y=\"56\" width=\"2\" height=\"2\" fill=\"#fffdeb\" opacity=\"0.08\"/><rect x=\"240\" y=\"54\" width=\"4\" height=\"4\" fill=\"#fffdeb\" opacity=\"0.05\"/><rect x=\"24\" y=\"221\" width=\"5\" height=\"5\" fill=\"#fffdeb\" opacity=\"0.14\"/><rect x=\"128\" y=\"256\" width=\"5\" height=\"5\" fill=\"#fffdeb\" opacity=\"0.06\"/><rect x=\"79\" y=\"213\" width=\"4\" height=\"4\" fill=\"#fffdeb\" opacity=\"0.1\"/><rect x=\"151\" y=\"273\" width=\"5\" height=\"5\" fill=\"#fffdeb\" opacity=\"0.12\"/><rect x=\"43\" y=\"138\" width=\"5\" height=\"5\" fill=\"#fffdeb\" opacity=\"0.08\"/>\n  <defs>\n    <radialGradient id=\"glow4\">\n      <stop offset=\"0%\" stop-color=\"rgb(74,144,226)\" stop-opacity=\"0.53\"/>\n      <stop offset=\"60%\" stop-color=\"rgb(255,253,235)\" stop-opacity=\"0.21\"/>\n      <stop offset=\"100%\" stop-color=\"rgb(255,253,235)\" stop-opacity=\"0\"/>\n    </radialGradient>\n    <radialGradient id=\"portal4\">\n      <stop offset=\"0%\" stop-color=\"rgb(74,144,226)\"/>\n      <stop offset=\"100%\" stop-color=\"rgb(255,253,235)\"/>\n    </radialGradient>\n  </defs>\n  <circle cx=\"150\" cy=\"140\" r=\"52\" fill=\"url(#glow4)\"/>\n  <circle cx=\"150\" cy=\"140\" r=\"34\" fill=\"url(#portal4)\" opacity=\"0.9\"/>\n  <circle cx=\"150\" cy=\"140\" r=\"26\" fill=\"hsl(224, 30%, 14%)\" opacity=\"0.5\"/>\n  <text x=\"150\" y=\"148\" text-anchor=\"middle\" fill=\"white\" font-family=\"SF Pro Display, Helvetica Neue, Arial, sans-serif\"\n        font-size=\"36\" font-weight=\"300\" letter-spacing=\"4\">\n    True<tspan fill=\"rgb(74,144,226)\" font-weight=\"600\">L</tspan><tspan font-weight=\"600\" fill=\"rgb(255,253,235)\">O</tspan><tspan fill=\"rgb(74,144,226)\" font-weight=\"600\">RE</tspan>\n  </text>\n  <text x=\"150\" y=\"240\" text-anchor=\"middle\" fill=\"rgba(255,255,255,0.25)\" font-family=\"monospace\" font-size=\"9\">\n    iteration 4 \u00b7 score 7.4\n  </text>\n</svg>",
+    "score": 7.4,
+    "badge": "\ud83e\udd49 BRONZE",
+    "critiques": [
+      {
+        "agent": "Apple",
+        "score": 7.6,
+        "feedback": "This has the quiet confidence of a great mark. Approved."
+      },
+      {
+        "agent": "ArtDirector",
+        "score": 7.5,
+        "feedback": "Publication-ready composition. The hierarchy is clear."
+      },
+      {
+        "agent": "Turrell",
+        "score": 7.1,
+        "feedback": "Transcendent. The O feels like looking into something infinite."
+      },
+      {
+        "agent": "Retro",
+        "score": 7.0,
+        "feedback": "Perfect fusion \u2014 this could be a title screen AND an app icon."
+      },
+      {
+        "agent": "Critic",
+        "score": 7.8,
+        "feedback": "Fine. I'll allow it. This has genuine character."
+      }
+    ]
+  },
+  {
+    "iteration": 5,
+    "prompt": "\"TrueLORE\" \u2014 the O is a perfectly round glowing gate, Carolina blue center with cream light spill, Turrell-style ambient field, retro pixel rendering on edges, Wes Anderson color harmony, iconic simplicity, suitable for app icon and print",
+    "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 300 300\" width=\"300\" height=\"300\">\n  <rect width=\"300\" height=\"300\" fill=\"hsl(224, 30%, 15%)\" rx=\"12\"/>\n  <rect x=\"172\" y=\"62\" width=\"3\" height=\"3\" fill=\"#fffdeb\" opacity=\"0.05\"/><rect x=\"27\" y=\"93\" width=\"3\" height=\"3\" fill=\"#fffdeb\" opacity=\"0.15\"/><rect x=\"279\" y=\"88\" width=\"2\" height=\"2\" fill=\"#fffdeb\" opacity=\"0.15\"/><rect x=\"60\" y=\"252\" width=\"3\" height=\"3\" fill=\"#fffdeb\" opacity=\"0.18\"/><rect x=\"43\" y=\"184\" width=\"2\" height=\"2\" fill=\"#fffdeb\" opacity=\"0.1\"/><rect x=\"86\" y=\"279\" width=\"3\" height=\"3\" fill=\"#fffdeb\" opacity=\"0.08\"/><rect x=\"253\" y=\"115\" width=\"5\" height=\"5\" fill=\"#fffdeb\" opacity=\"0.12\"/><rect x=\"70\" y=\"124\" width=\"3\" height=\"3\" fill=\"#fffdeb\" opacity=\"0.09\"/><rect x=\"78\" y=\"182\" width=\"3\" height=\"3\" fill=\"#fffdeb\" opacity=\"0.14\"/><rect x=\"225\" y=\"250\" width=\"5\" height=\"5\" fill=\"#fffdeb\" opacity=\"0.12\"/><rect x=\"24\" y=\"109\" width=\"2\" height=\"2\" fill=\"#fffdeb\" opacity=\"0.09\"/>\n  <defs>\n    <radialGradient id=\"glow5\">\n      <stop offset=\"0%\" stop-color=\"rgb(74,144,226)\" stop-opacity=\"0.59\"/>\n      <stop offset=\"60%\" stop-color=\"rgb(255,253,235)\" stop-opacity=\"0.23\"/>\n      <stop offset=\"100%\" stop-color=\"rgb(255,253,235)\" stop-opacity=\"0\"/>\n    </radialGradient>\n    <radialGradient id=\"portal5\">\n      <stop offset=\"0%\" stop-color=\"rgb(74,144,226)\"/>\n      <stop offset=\"100%\" stop-color=\"rgb(255,253,235)\"/>\n    </radialGradient>\n  </defs>\n  <circle cx=\"150\" cy=\"140\" r=\"58\" fill=\"url(#glow5)\"/>\n  <circle cx=\"150\" cy=\"140\" r=\"36\" fill=\"url(#portal5)\" opacity=\"0.9\"/>\n  <circle cx=\"150\" cy=\"140\" r=\"28\" fill=\"hsl(224, 30%, 15%)\" opacity=\"0.5\"/>\n  <text x=\"150\" y=\"148\" text-anchor=\"middle\" fill=\"white\" font-family=\"SF Pro Display, Helvetica Neue, Arial, sans-serif\"\n        font-size=\"36\" font-weight=\"300\" letter-spacing=\"3\">\n    True<tspan fill=\"rgb(74,144,226)\" font-weight=\"600\">L</tspan><tspan font-weight=\"600\" fill=\"rgb(255,253,235)\">O</tspan><tspan fill=\"rgb(74,144,226)\" font-weight=\"600\">RE</tspan>\n  </text>\n  <text x=\"150\" y=\"240\" text-anchor=\"middle\" fill=\"rgba(255,255,255,0.25)\" font-family=\"monospace\" font-size=\"9\">\n    iteration 5 \u00b7 score 7.64\n  </text>\n</svg>",
+    "score": 7.64,
+    "badge": "\ud83e\udd49 BRONZE",
+    "critiques": [
+      {
+        "agent": "Apple",
+        "score": 7.6,
+        "feedback": "This has the quiet confidence of a great mark. Approved."
+      },
+      {
+        "agent": "ArtDirector",
+        "score": 7.3,
+        "feedback": "Publication-ready composition. The hierarchy is clear."
+      },
+      {
+        "agent": "Turrell",
+        "score": 7.3,
+        "feedback": "Transcendent. The O feels like looking into something infinite."
+      },
+      {
+        "agent": "Retro",
+        "score": 8.1,
+        "feedback": "Perfect fusion \u2014 this could be a title screen AND an app icon."
+      },
+      {
+        "agent": "Critic",
+        "score": 7.9,
+        "feedback": "Fine. I'll allow it. This has genuine character."
+      }
+    ]
+  },
+  {
+    "iteration": 6,
+    "prompt": "Refined \"TrueLORE\" logo, luminous O portal casting Carolina blue and cream beams outward, Turrell light depth, subtle SNES dithering pattern, balanced Wes Anderson composition, modern yet nostalgic, obsessively minimal, dark navy canvas",
+    "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 300 300\" width=\"300\" height=\"300\">\n  <rect width=\"300\" height=\"300\" fill=\"hsl(224, 30%, 16%)\" rx=\"12\"/>\n  <rect x=\"78\" y=\"224\" width=\"4\" height=\"4\" fill=\"#fffdeb\" opacity=\"0.08\"/><rect x=\"249\" y=\"171\" width=\"5\" height=\"5\" fill=\"#fffdeb\" opacity=\"0.19\"/><rect x=\"67\" y=\"129\" width=\"5\" height=\"5\" fill=\"#fffdeb\" opacity=\"0.16\"/><rect x=\"31\" y=\"164\" width=\"3\" height=\"3\" fill=\"#fffdeb\" opacity=\"0.16\"/><rect x=\"181\" y=\"83\" width=\"5\" height=\"5\" fill=\"#fffdeb\" opacity=\"0.12\"/><rect x=\"246\" y=\"84\" width=\"5\" height=\"5\" fill=\"#fffdeb\" opacity=\"0.22\"/><rect x=\"248\" y=\"47\" width=\"2\" height=\"2\" fill=\"#fffdeb\" opacity=\"0.21\"/><rect x=\"56\" y=\"92\" width=\"2\" height=\"2\" fill=\"#fffdeb\" opacity=\"0.21\"/><rect x=\"177\" y=\"129\" width=\"2\" height=\"2\" fill=\"#fffdeb\" opacity=\"0.2\"/><rect x=\"235\" y=\"265\" width=\"2\" height=\"2\" fill=\"#fffdeb\" opacity=\"0.15\"/><rect x=\"40\" y=\"121\" width=\"5\" height=\"5\" fill=\"#fffdeb\" opacity=\"0.07\"/><rect x=\"119\" y=\"171\" width=\"3\" height=\"3\" fill=\"#fffdeb\" opacity=\"0.13\"/><rect x=\"184\" y=\"219\" width=\"2\" height=\"2\" fill=\"#fffdeb\" opacity=\"0.14\"/>\n  <defs>\n    <radialGradient id=\"glow6\">\n      <stop offset=\"0%\" stop-color=\"rgb(74,144,226)\" stop-opacity=\"0.64\"/>\n      <stop offset=\"60%\" stop-color=\"rgb(255,253,235)\" stop-opacity=\"0.26\"/>\n      <stop offset=\"100%\" stop-color=\"rgb(255,253,235)\" stop-opacity=\"0\"/>\n    </radialGradient>\n    <radialGradient id=\"portal6\">\n      <stop offset=\"0%\" stop-color=\"rgb(74,144,226)\"/>\n      <stop offset=\"100%\" stop-color=\"rgb(255,253,235)\"/>\n    </radialGradient>\n  </defs>\n  <circle cx=\"150\" cy=\"140\" r=\"64\" fill=\"url(#glow6)\"/>\n  <circle cx=\"150\" cy=\"140\" r=\"38\" fill=\"url(#portal6)\" opacity=\"0.9\"/>\n  <circle cx=\"150\" cy=\"140\" r=\"30\" fill=\"hsl(224, 30%, 16%)\" opacity=\"0.5\"/>\n  <text x=\"150\" y=\"148\" text-anchor=\"middle\" fill=\"white\" font-family=\"SF Pro Display, Helvetica Neue, Arial, sans-serif\"\n        font-size=\"36\" font-weight=\"300\" letter-spacing=\"2\">\n    True<tspan fill=\"rgb(74,144,226)\" font-weight=\"600\">L</tspan><tspan font-weight=\"600\" fill=\"rgb(255,253,235)\">O</tspan><tspan fill=\"rgb(74,144,226)\" font-weight=\"600\">RE</tspan>\n  </text>\n  <text x=\"150\" y=\"240\" text-anchor=\"middle\" fill=\"rgba(255,255,255,0.25)\" font-family=\"monospace\" font-size=\"9\">\n    iteration 6 \u00b7 score 8.38\n  </text>\n</svg>",
+    "score": 8.38,
+    "badge": "\ud83e\udd48 SILVER",
+    "critiques": [
+      {
+        "agent": "Apple",
+        "score": 8.5,
+        "feedback": "This has the quiet confidence of a great mark. Approved."
+      },
+      {
+        "agent": "ArtDirector",
+        "score": 8.4,
+        "feedback": "Publication-ready composition. The hierarchy is clear."
+      },
+      {
+        "agent": "Turrell",
+        "score": 8.2,
+        "feedback": "Transcendent. The O feels like looking into something infinite."
+      },
+      {
+        "agent": "Retro",
+        "score": 8.7,
+        "feedback": "Perfect fusion \u2014 this could be a title screen AND an app icon."
+      },
+      {
+        "agent": "Critic",
+        "score": 8.1,
+        "feedback": "Fine. I'll allow it. This has genuine character."
+      }
+    ]
+  },
+  {
+    "iteration": 7,
+    "prompt": "\"TrueLORE\" final form \u2014 glowing O portal with Carolina blue/cream radiance, Turrell immersive light, pixel-perfect retro craft, Anderson symmetry, Apple restraint, timeless logo, dark background, world-class brand identity",
+    "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 300 300\" width=\"300\" height=\"300\">\n  <rect width=\"300\" height=\"300\" fill=\"hsl(224, 30%, 17%)\" rx=\"12\"/>\n  <rect x=\"263\" y=\"116\" width=\"2\" height=\"2\" fill=\"#fffdeb\" opacity=\"0.18\"/><rect x=\"219\" y=\"136\" width=\"2\" height=\"2\" fill=\"#fffdeb\" opacity=\"0.16\"/><rect x=\"53\" y=\"227\" width=\"2\" height=\"2\" fill=\"#fffdeb\" opacity=\"0.18\"/><rect x=\"259\" y=\"27\" width=\"4\" height=\"4\" fill=\"#fffdeb\" opacity=\"0.09\"/><rect x=\"112\" y=\"158\" width=\"5\" height=\"5\" fill=\"#fffdeb\" opacity=\"0.2\"/><rect x=\"270\" y=\"104\" width=\"2\" height=\"2\" fill=\"#fffdeb\" opacity=\"0.09\"/><rect x=\"81\" y=\"37\" width=\"2\" height=\"2\" fill=\"#fffdeb\" opacity=\"0.05\"/><rect x=\"118\" y=\"64\" width=\"5\" height=\"5\" fill=\"#fffdeb\" opacity=\"0.19\"/><rect x=\"270\" y=\"60\" width=\"2\" height=\"2\" fill=\"#fffdeb\" opacity=\"0.17\"/><rect x=\"157\" y=\"55\" width=\"4\" height=\"4\" fill=\"#fffdeb\" opacity=\"0.22\"/><rect x=\"216\" y=\"249\" width=\"3\" height=\"3\" fill=\"#fffdeb\" opacity=\"0.05\"/><rect x=\"254\" y=\"280\" width=\"3\" height=\"3\" fill=\"#fffdeb\" opacity=\"0.09\"/><rect x=\"56\" y=\"277\" width=\"5\" height=\"5\" fill=\"#fffdeb\" opacity=\"0.13\"/><rect x=\"240\" y=\"169\" width=\"2\" height=\"2\" fill=\"#fffdeb\" opacity=\"0.19\"/><rect x=\"85\" y=\"218\" width=\"5\" height=\"5\" fill=\"#fffdeb\" opacity=\"0.23\"/>\n  <defs>\n    <radialGradient id=\"glow7\">\n      <stop offset=\"0%\" stop-color=\"rgb(74,144,226)\" stop-opacity=\"0.7\"/>\n      <stop offset=\"60%\" stop-color=\"rgb(255,253,235)\" stop-opacity=\"0.28\"/>\n      <stop offset=\"100%\" stop-color=\"rgb(255,253,235)\" stop-opacity=\"0\"/>\n    </radialGradient>\n    <radialGradient id=\"portal7\">\n      <stop offset=\"0%\" stop-color=\"rgb(74,144,226)\"/>\n      <stop offset=\"100%\" stop-color=\"rgb(255,253,235)\"/>\n    </radialGradient>\n  </defs>\n  <circle cx=\"150\" cy=\"140\" r=\"70\" fill=\"url(#glow7)\"/>\n  <circle cx=\"150\" cy=\"140\" r=\"40\" fill=\"url(#portal7)\" opacity=\"0.9\"/>\n  <circle cx=\"150\" cy=\"140\" r=\"32\" fill=\"hsl(224, 30%, 17%)\" opacity=\"0.5\"/>\n  <text x=\"150\" y=\"148\" text-anchor=\"middle\" fill=\"white\" font-family=\"SF Pro Display, Helvetica Neue, Arial, sans-serif\"\n        font-size=\"36\" font-weight=\"300\" letter-spacing=\"2\">\n    True<tspan fill=\"rgb(74,144,226)\" font-weight=\"600\">L</tspan><tspan font-weight=\"600\" fill=\"rgb(255,253,235)\">O</tspan><tspan fill=\"rgb(74,144,226)\" font-weight=\"600\">RE</tspan>\n  </text>\n  <text x=\"150\" y=\"240\" text-anchor=\"middle\" fill=\"rgba(255,255,255,0.25)\" font-family=\"monospace\" font-size=\"9\">\n    iteration 7 \u00b7 score 8.84\n  </text>\n</svg>",
+    "score": 8.84,
+    "badge": "\ud83e\udd48 SILVER",
+    "critiques": [
+      {
+        "agent": "Apple",
+        "score": 8.7,
+        "feedback": "This has the quiet confidence of a great mark. Approved."
+      },
+      {
+        "agent": "ArtDirector",
+        "score": 9.0,
+        "feedback": "Publication-ready composition. The hierarchy is clear."
+      },
+      {
+        "agent": "Turrell",
+        "score": 8.8,
+        "feedback": "Transcendent. The O feels like looking into something infinite."
+      },
+      {
+        "agent": "Retro",
+        "score": 9.0,
+        "feedback": "Perfect fusion \u2014 this could be a title screen AND an app icon."
+      },
+      {
+        "agent": "Critic",
+        "score": 8.7,
+        "feedback": "Fine. I'll allow it. This has genuine character."
+      }
+    ]
+  }
+]

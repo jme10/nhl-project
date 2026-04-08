@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>TrueLORE Design Lab</title>
+<style>
+  :root {
+    --bg: #0b0f1a;
+    --card-bg: #111827;
+    --card-hover: #1a2234;
+    --blue: #4a90e2;
+    --cream: #fffde8;
+    --text: #e2e8f0;
+    --text-dim: #64748b;
+    --gold: #fbbf24;
+    --silver: #94a3b8;
+    --bronze: #d97706;
+    --radius: 12px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+    padding: 40px 24px;
+    min-height: 100vh;
+  }
+
+  .container {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+
+  h1 {
+    font-size: 2.4rem;
+    font-weight: 200;
+    letter-spacing: 6px;
+    margin-bottom: 8px;
+  }
+
+  h1 .highlight {
+    color: var(--blue);
+    font-weight: 600;
+  }
+
+  .subtitle {
+    color: var(--text-dim);
+    font-size: 0.95rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .controls {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 36px;
+    flex-wrap: wrap;
+  }
+
+  .controls button {
+    background: var(--card-bg);
+    color: var(--text);
+    border: 1px solid rgba(255,255,255,0.08);
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+    transition: all 0.2s;
+  }
+
+  .controls button:hover,
+  .controls button.active {
+    background: var(--blue);
+    color: white;
+    border-color: var(--blue);
+  }
+
+  .stats {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin-bottom: 36px;
+  }
+
+  .stat {
+    text-align: center;
+  }
+
+  .stat-value {
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--blue);
+  }
+
+  .stat-label {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 4px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 24px;
+  }
+
+  .card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.04);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(74, 144, 226, 0.15);
+  }
+
+  .card-img {
+    padding: 16px 16px 0;
+  }
+
+  .card-img img {
+    width: 100%;
+    border-radius: 8px;
+    display: block;
+  }
+
+  .card-body {
+    padding: 16px;
+  }
+
+  .score-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .score {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--cream);
+  }
+
+  .badge {
+    font-size: 0.85rem;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: rgba(251, 191, 36, 0.15);
+    color: var(--gold);
+  }
+
+  .iteration {
+    margin-left: auto;
+    color: var(--text-dim);
+    font-size: 0.8rem;
+    font-family: monospace;
+  }
+
+  details {
+    margin-top: 8px;
+  }
+
+  summary {
+    cursor: pointer;
+    color: var(--blue);
+    font-size: 0.85rem;
+    padding: 6px 0;
+    user-select: none;
+  }
+
+  summary:hover {
+    color: var(--cream);
+  }
+
+  .prompt-text {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    line-height: 1.5;
+    padding: 8px;
+    background: rgba(0,0,0,0.3);
+    border-radius: 6px;
+    margin-top: 4px;
+  }
+
+  .critiques {
+    margin-top: 4px;
+  }
+
+  .critique {
+    padding: 8px;
+    margin-bottom: 6px;
+    background: rgba(0,0,0,0.2);
+    border-radius: 6px;
+    border-left: 3px solid var(--blue);
+  }
+
+  .agent-name {
+    font-weight: 600;
+    font-size: 0.8rem;
+    color: var(--blue);
+    margin-right: 8px;
+  }
+
+  .agent-score {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    font-family: monospace;
+  }
+
+  .critique p {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    margin-top: 4px;
+    line-height: 1.4;
+  }
+
+  .progress-bar {
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+    margin-bottom: 36px;
+  }
+
+  .progress-dot {
+    width: 40px;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--card-bg);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .progress-dot .fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.3s;
+  }
+
+  footer {
+    text-align: center;
+    margin-top: 60px;
+    padding: 20px;
+    color: var(--text-dim);
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<header>
+  <h1>True<span class="highlight">LORE</span> Design Lab</h1>
+  <p class="subtitle">Iterative Logo Generation Pipeline</p>
+</header>
+
+<div class="stats">
+  <div class="stat">
+    <div class="stat-value">8</div>
+    <div class="stat-label">Iterations</div>
+  </div>
+  <div class="stat">
+    <div class="stat-value">8.84</div>
+    <div class="stat-label">Best Score</div>
+  </div>
+  <div class="stat">
+    <div class="stat-value">7.1</div>
+    <div class="stat-label">Avg Score</div>
+  </div>
+  <div class="stat">
+    <div class="stat-value">5</div>
+    <div class="stat-label">Agents</div>
+  </div>
+</div>
+
+<div class="progress-bar">
+  <div class="progress-dot"><div class="fill" style="width:53.6%;background:var(--text-dim)"></div></div><div class="progress-dot"><div class="fill" style="width:58.60000000000001%;background:var(--text-dim)"></div></div><div class="progress-dot"><div class="fill" style="width:62.0%;background:var(--text-dim)"></div></div><div class="progress-dot"><div class="fill" style="width:68.0%;background:var(--text-dim)"></div></div><div class="progress-dot"><div class="fill" style="width:74.0%;background:var(--blue)"></div></div><div class="progress-dot"><div class="fill" style="width:76.4%;background:var(--blue)"></div></div><div class="progress-dot"><div class="fill" style="width:83.80000000000001%;background:var(--blue)"></div></div><div class="progress-dot"><div class="fill" style="width:88.4%;background:var(--blue)"></div></div>
+</div>
+
+<div class="controls">
+  <button onclick="sortBy('score')" class="active">Sort by Score</button>
+  <button onclick="sortBy('iteration')">Sort by Iteration</button>
+  <button onclick="filterMin(8)">Show &ge; 8</button>
+  <button onclick="filterMin(7)">Show &ge; 7</button>
+  <button onclick="filterMin(0)">Show All</button>
+</div>
+
+<div id="grid" class="grid">
+
+    <div class="card" data-score="5.36" data-iteration="0">
+      <div class="card-img">
+        <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMDAgMzAwIiB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCI+CiAgPHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIzMDAiIGZpbGw9ImhzbCgyMjQsIDMwJSwgMTElKSIgcng9IjEyIi8+CiAgPHJlY3QgeD0iMjE3IiB5PSIyMzUiIHdpZHRoPSIyIiBoZWlnaHQ9IjIiIGZpbGw9IiNmZmZkZWIiIG9wYWNpdHk9IjAuMDgiLz48cmVjdCB4PSIyNjgiIHk9IjIyNyIgd2lkdGg9IjQiIGhlaWdodD0iNCIgZmlsbD0iI2ZmZmRlYiIgb3BhY2l0eT0iMC4xNSIvPjxyZWN0IHg9IjIwMyIgeT0iMTMxIiB3aWR0aD0iMyIgaGVpZ2h0PSIzIiBmaWxsPSIjZmZmZGViIiBvcGFjaXR5PSIwLjA4Ii8+CiAgPGRlZnM+CiAgICA8cmFkaWFsR3JhZGllbnQgaWQ9Imdsb3cwIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0icmdiKDc0LDE0NCwyMjYpIiBzdG9wLW9wYWNpdHk9IjAuMyIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjYwJSIgc3RvcC1jb2xvcj0icmdiKDI1NSwyNTMsMjM1KSIgc3RvcC1vcGFjaXR5PSIwLjEyIi8+CiAgICAgIDxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0icmdiKDI1NSwyNTMsMjM1KSIgc3RvcC1vcGFjaXR5PSIwIi8+CiAgICA8L3JhZGlhbEdyYWRpZW50PgogICAgPHJhZGlhbEdyYWRpZW50IGlkPSJwb3J0YWwwIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0icmdiKDc0LDE0NCwyMjYpIi8+CiAgICAgIDxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0icmdiKDI1NSwyNTMsMjM1KSIvPgogICAgPC9yYWRpYWxHcmFkaWVudD4KICA8L2RlZnM+CiAgPGNpcmNsZSBjeD0iMTUwIiBjeT0iMTQwIiByPSIzMCIgZmlsbD0idXJsKCNnbG93MCkiLz4KICA8Y2lyY2xlIGN4PSIxNTAiIGN5PSIxNDAiIHI9IjI4IiBmaWxsPSJ1cmwoI3BvcnRhbDApIiBvcGFjaXR5PSIwLjkiLz4KICA8Y2lyY2xlIGN4PSIxNTAiIGN5PSIxNDAiIHI9IjIwIiBmaWxsPSJoc2woMjI0LCAzMCUsIDExJSkiIG9wYWNpdHk9IjAuNSIvPgogIDx0ZXh0IHg9IjE1MCIgeT0iMTQ4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSJ3aGl0ZSIgZm9udC1mYW1pbHk9IlNGIFBybyBEaXNwbGF5LCBIZWx2ZXRpY2EgTmV1ZSwgQXJpYWwsIHNhbnMtc2VyaWYiCiAgICAgICAgZm9udC1zaXplPSIzNiIgZm9udC13ZWlnaHQ9IjMwMCIgbGV0dGVyLXNwYWNpbmc9IjgiPgogICAgVHJ1ZTx0c3BhbiBmaWxsPSJyZ2IoNzQsMTQ0LDIyNikiIGZvbnQtd2VpZ2h0PSI2MDAiPkw8L3RzcGFuPjx0c3BhbiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSJyZ2IoMjU1LDI1MywyMzUpIj5PPC90c3Bhbj48dHNwYW4gZmlsbD0icmdiKDc0LDE0NCwyMjYpIiBmb250LXdlaWdodD0iNjAwIj5SRTwvdHNwYW4+CiAgPC90ZXh0PgogIDx0ZXh0IHg9IjE1MCIgeT0iMjQwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMjUpIiBmb250LWZhbWlseT0ibW9ub3NwYWNlIiBmb250LXNpemU9IjkiPgogICAgaXRlcmF0aW9uIDAgwrcgc2NvcmUgNS4zNgogIDwvdGV4dD4KPC9zdmc+" alt="Iteration 0"/>
+      </div>
+      <div class="card-body">
+        <div class="score-row">
+          <span class="score">5.36</span>
+          
+          <span class="iteration">#0</span>
+        </div>
+        <details>
+          <summary>Prompt</summary>
+          <p class="prompt-text">Minimalist wordmark "TrueLORE" with the O as a glowing Carolina blue portal radiating soft cream light, James Turrell gradient backdrop, Wes Anderson centered symmetry, subtle SNES pixel texture on letterforms, clean sans-serif, dark navy background, logo design</p>
+        </details>
+        <details>
+          <summary>Critiques (5 agents)</summary>
+          <div class="critiques"><div class="critique"><span class="agent-name">Apple</span><span class="agent-score">5.6</span><p>Too many elements competing for attention. Simplify.</p></div><div class="critique"><span class="agent-name">ArtDirector</span><span class="agent-score">5.0</span><p>Typography needs more breathing room. Kerning is tight on the 'LO' pair.</p></div><div class="critique"><span class="agent-name">Turrell</span><span class="agent-score">5.3</span><p>The light feels applied, not emanated. It should come from within.</p></div><div class="critique"><span class="agent-name">Retro</span><span class="agent-score">5.2</span><p>The pixel grid is too subtle — I can barely see the SNES influence.</p></div><div class="critique"><span class="agent-name">Critic</span><span class="agent-score">5.7</span><p>Mediocre. I've seen a hundred glowing-letter logos. Where's the soul?</p></div></div>
+        </details>
+      </div>
+    </div>
+    <div class="card" data-score="5.86" data-iteration="1">
+      <div class="card-img">
+        <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMDAgMzAwIiB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCI+CiAgPHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIzMDAiIGZpbGw9ImhzbCgyMjQsIDMwJSwgMTElKSIgcng9IjEyIi8+CiAgPHJlY3QgeD0iNTciIHk9IjExMiIgd2lkdGg9IjUiIGhlaWdodD0iNSIgZmlsbD0iI2ZmZmRlYiIgb3BhY2l0eT0iMC4wOSIvPjxyZWN0IHg9IjExOCIgeT0iMTM4IiB3aWR0aD0iNSIgaGVpZ2h0PSI1IiBmaWxsPSIjZmZmZGViIiBvcGFjaXR5PSIwLjA5Ii8+PHJlY3QgeD0iMjI3IiB5PSIxODQiIHdpZHRoPSI1IiBoZWlnaHQ9IjUiIGZpbGw9IiNmZmZkZWIiIG9wYWNpdHk9IjAuMTUiLz48cmVjdCB4PSIyNjIiIHk9Ijg5IiB3aWR0aD0iNSIgaGVpZ2h0PSI1IiBmaWxsPSIjZmZmZGViIiBvcGFjaXR5PSIwLjExIi8+CiAgPGRlZnM+CiAgICA8cmFkaWFsR3JhZGllbnQgaWQ9Imdsb3cxIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0icmdiKDc0LDE0NCwyMjYpIiBzdG9wLW9wYWNpdHk9IjAuMzYiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSI2MCUiIHN0b3AtY29sb3I9InJnYigyNTUsMjUzLDIzNSkiIHN0b3Atb3BhY2l0eT0iMC4xNCIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9InJnYigyNTUsMjUzLDIzNSkiIHN0b3Atb3BhY2l0eT0iMCIvPgogICAgPC9yYWRpYWxHcmFkaWVudD4KICAgIDxyYWRpYWxHcmFkaWVudCBpZD0icG9ydGFsMSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9InJnYig3NCwxNDQsMjI2KSIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9InJnYigyNTUsMjUzLDIzNSkiLz4KICAgIDwvcmFkaWFsR3JhZGllbnQ+CiAgPC9kZWZzPgogIDxjaXJjbGUgY3g9IjE1MCIgY3k9IjE0MCIgcj0iMzUiIGZpbGw9InVybCgjZ2xvdzEpIi8+CiAgPGNpcmNsZSBjeD0iMTUwIiBjeT0iMTQwIiByPSIyOSIgZmlsbD0idXJsKCNwb3J0YWwxKSIgb3BhY2l0eT0iMC45Ii8+CiAgPGNpcmNsZSBjeD0iMTUwIiBjeT0iMTQwIiByPSIyMSIgZmlsbD0iaHNsKDIyNCwgMzAlLCAxMSUpIiBvcGFjaXR5PSIwLjUiLz4KICA8dGV4dCB4PSIxNTAiIHk9IjE0OCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0id2hpdGUiIGZvbnQtZmFtaWx5PSJTRiBQcm8gRGlzcGxheSwgSGVsdmV0aWNhIE5ldWUsIEFyaWFsLCBzYW5zLXNlcmlmIgogICAgICAgIGZvbnQtc2l6ZT0iMzYiIGZvbnQtd2VpZ2h0PSIzMDAiIGxldHRlci1zcGFjaW5nPSI3Ij4KICAgIFRydWU8dHNwYW4gZmlsbD0icmdiKDc0LDE0NCwyMjYpIiBmb250LXdlaWdodD0iNjAwIj5MPC90c3Bhbj48dHNwYW4gZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0icmdiKDI1NSwyNTMsMjM1KSI+TzwvdHNwYW4+PHRzcGFuIGZpbGw9InJnYig3NCwxNDQsMjI2KSIgZm9udC13ZWlnaHQ9IjYwMCI+UkU8L3RzcGFuPgogIDwvdGV4dD4KICA8dGV4dCB4PSIxNTAiIHk9IjI0MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjI1KSIgZm9udC1mYW1pbHk9Im1vbm9zcGFjZSIgZm9udC1zaXplPSI5Ij4KICAgIGl0ZXJhdGlvbiAxIMK3IHNjb3JlIDUuODYKICA8L3RleHQ+Cjwvc3ZnPg==" alt="Iteration 1"/>
+      </div>
+      <div class="card-body">
+        <div class="score-row">
+          <span class="score">5.86</span>
+          
+          <span class="iteration">#1</span>
+        </div>
+        <details>
+          <summary>Prompt</summary>
+          <p class="prompt-text">"TrueLORE" logotype, the O is a luminous circular portal emitting Carolina blue and warm cream rays, Turrell-inspired ambient light halo, perfectly symmetrical Wes Anderson framing, fine 16-bit pixel grid overlay, Apple-level simplicity, matte black background, vector logo</p>
+        </details>
+        <details>
+          <summary>Critiques (5 agents)</summary>
+          <div class="critiques"><div class="critique"><span class="agent-name">Apple</span><span class="agent-score">6.1</span><p>Getting cleaner. The portal glow is nice but the pixel texture fights the minimalism.</p></div><div class="critique"><span class="agent-name">ArtDirector</span><span class="agent-score">6.3</span><p>Better spacing. The symmetry is landing but the baseline feels heavy.</p></div><div class="critique"><span class="agent-name">Turrell</span><span class="agent-score">5.5</span><p>Better depth now — the gradient has real dimensionality.</p></div><div class="critique"><span class="agent-name">Retro</span><span class="agent-score">5.9</span><p>Better. The dithering on the portal edge reads as authentic 16-bit.</p></div><div class="critique"><span class="agent-name">Critic</span><span class="agent-score">5.5</span><p>Improving but still generic. The Turrell reference is surface-level.</p></div></div>
+        </details>
+      </div>
+    </div>
+    <div class="card" data-score="6.2" data-iteration="2">
+      <div class="card-img">
+        <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMDAgMzAwIiB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCI+CiAgPHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIzMDAiIGZpbGw9ImhzbCgyMjQsIDMwJSwgMTIlKSIgcng9IjEyIi8+CiAgPHJlY3QgeD0iOTMiIHk9IjI1NCIgd2lkdGg9IjQiIGhlaWdodD0iNCIgZmlsbD0iI2ZmZmRlYiIgb3BhY2l0eT0iMC4xIi8+PHJlY3QgeD0iMTI3IiB5PSIzMyIgd2lkdGg9IjQiIGhlaWdodD0iNCIgZmlsbD0iI2ZmZmRlYiIgb3BhY2l0eT0iMC4wOCIvPjxyZWN0IHg9IjEzMSIgeT0iMjciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiIGZpbGw9IiNmZmZkZWIiIG9wYWNpdHk9IjAuMTYiLz48cmVjdCB4PSIyNjIiIHk9IjE5NCIgd2lkdGg9IjIiIGhlaWdodD0iMiIgZmlsbD0iI2ZmZmRlYiIgb3BhY2l0eT0iMC4xIi8+PHJlY3QgeD0iMjA5IiB5PSIxNjIiIHdpZHRoPSIyIiBoZWlnaHQ9IjIiIGZpbGw9IiNmZmZkZWIiIG9wYWNpdHk9IjAuMTUiLz48cmVjdCB4PSIyMDMiIHk9IjEzNSIgd2lkdGg9IjMiIGhlaWdodD0iMyIgZmlsbD0iI2ZmZmRlYiIgb3BhY2l0eT0iMC4xNSIvPgogIDxkZWZzPgogICAgPHJhZGlhbEdyYWRpZW50IGlkPSJnbG93MiI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9InJnYig3NCwxNDQsMjI2KSIgc3RvcC1vcGFjaXR5PSIwLjQxIi8+CiAgICAgIDxzdG9wIG9mZnNldD0iNjAlIiBzdG9wLWNvbG9yPSJyZ2IoMjU1LDI1MywyMzUpIiBzdG9wLW9wYWNpdHk9IjAuMTciLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSJyZ2IoMjU1LDI1MywyMzUpIiBzdG9wLW9wYWNpdHk9IjAiLz4KICAgIDwvcmFkaWFsR3JhZGllbnQ+CiAgICA8cmFkaWFsR3JhZGllbnQgaWQ9InBvcnRhbDIiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSJyZ2IoNzQsMTQ0LDIyNikiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSJyZ2IoMjU1LDI1MywyMzUpIi8+CiAgICA8L3JhZGlhbEdyYWRpZW50PgogIDwvZGVmcz4KICA8Y2lyY2xlIGN4PSIxNTAiIGN5PSIxNDAiIHI9IjQxIiBmaWxsPSJ1cmwoI2dsb3cyKSIvPgogIDxjaXJjbGUgY3g9IjE1MCIgY3k9IjE0MCIgcj0iMzEiIGZpbGw9InVybCgjcG9ydGFsMikiIG9wYWNpdHk9IjAuOSIvPgogIDxjaXJjbGUgY3g9IjE1MCIgY3k9IjE0MCIgcj0iMjMiIGZpbGw9ImhzbCgyMjQsIDMwJSwgMTIlKSIgb3BhY2l0eT0iMC41Ii8+CiAgPHRleHQgeD0iMTUwIiB5PSIxNDgiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IndoaXRlIiBmb250LWZhbWlseT0iU0YgUHJvIERpc3BsYXksIEhlbHZldGljYSBOZXVlLCBBcmlhbCwgc2Fucy1zZXJpZiIKICAgICAgICBmb250LXNpemU9IjM2IiBmb250LXdlaWdodD0iMzAwIiBsZXR0ZXItc3BhY2luZz0iNiI+CiAgICBUcnVlPHRzcGFuIGZpbGw9InJnYig3NCwxNDQsMjI2KSIgZm9udC13ZWlnaHQ9IjYwMCI+TDwvdHNwYW4+PHRzcGFuIGZvbnQtd2VpZ2h0PSI2MDAiIGZpbGw9InJnYigyNTUsMjUzLDIzNSkiPk88L3RzcGFuPjx0c3BhbiBmaWxsPSJyZ2IoNzQsMTQ0LDIyNikiIGZvbnQtd2VpZ2h0PSI2MDAiPlJFPC90c3Bhbj4KICA8L3RleHQ+CiAgPHRleHQgeD0iMTUwIiB5PSIyNDAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4yNSkiIGZvbnQtZmFtaWx5PSJtb25vc3BhY2UiIGZvbnQtc2l6ZT0iOSI+CiAgICBpdGVyYXRpb24gMiDCtyBzY29yZSA2LjIKICA8L3RleHQ+Cjwvc3ZnPg==" alt="Iteration 2"/>
+      </div>
+      <div class="card-body">
+        <div class="score-row">
+          <span class="score">6.2</span>
+          
+          <span class="iteration">#2</span>
+        </div>
+        <details>
+          <summary>Prompt</summary>
+          <p class="prompt-text">Iconic "TrueLORE" logo, glowing portal O with Carolina blue core fading to cream edges, Turrell light installation feel, retro SNES pixel grid at micro scale, Wes Anderson pastel accents, geometric balance, ultra-clean, dark slate background</p>
+        </details>
+        <details>
+          <summary>Critiques (5 agents)</summary>
+          <div class="critiques"><div class="critique"><span class="agent-name">Apple</span><span class="agent-score">6.1</span><p>Strong restraint here. The O portal reads clearly at small sizes.</p></div><div class="critique"><span class="agent-name">ArtDirector</span><span class="agent-score">6.4</span><p>Composition is solid. The portal O anchors the wordmark well.</p></div><div class="critique"><span class="agent-name">Turrell</span><span class="agent-score">5.9</span><p>The blue-to-cream transition is getting emotional. Keep pushing.</p></div><div class="critique"><span class="agent-name">Retro</span><span class="agent-score">6.1</span><p>Clean pixel work. It honors the aesthetic without being costumey.</p></div><div class="critique"><span class="agent-name">Critic</span><span class="agent-score">6.5</span><p>Now we're getting somewhere. The portal O actually means something.</p></div></div>
+        </details>
+      </div>
+    </div>
+    <div class="card" data-score="6.8" data-iteration="3">
+      <div class="card-img">
+        <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMDAgMzAwIiB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCI+CiAgPHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIzMDAiIGZpbGw9ImhzbCgyMjQsIDMwJSwgMTMlKSIgcng9IjEyIi8+CiAgPHJlY3QgeD0iMTMwIiB5PSIzMyIgd2lkdGg9IjQiIGhlaWdodD0iNCIgZmlsbD0iI2ZmZmRlYiIgb3BhY2l0eT0iMC4wOCIvPjxyZWN0IHg9IjEyMCIgeT0iMTM5IiB3aWR0aD0iNSIgaGVpZ2h0PSI1IiBmaWxsPSIjZmZmZGViIiBvcGFjaXR5PSIwLjExIi8+PHJlY3QgeD0iMTI3IiB5PSIyNSIgd2lkdGg9IjIiIGhlaWdodD0iMiIgZmlsbD0iI2ZmZmRlYiIgb3BhY2l0eT0iMC4xNSIvPjxyZWN0IHg9IjEzMSIgeT0iNTkiIHdpZHRoPSI0IiBoZWlnaHQ9IjQiIGZpbGw9IiNmZmZkZWIiIG9wYWNpdHk9IjAuMTQiLz48cmVjdCB4PSIxNjUiIHk9IjE4MiIgd2lkdGg9IjIiIGhlaWdodD0iMiIgZmlsbD0iI2ZmZmRlYiIgb3BhY2l0eT0iMC4wNiIvPjxyZWN0IHg9IjIzOCIgeT0iMTE5IiB3aWR0aD0iMyIgaGVpZ2h0PSIzIiBmaWxsPSIjZmZmZGViIiBvcGFjaXR5PSIwLjA1Ii8+PHJlY3QgeD0iNzEiIHk9Ijk2IiB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjZmZmZGViIiBvcGFjaXR5PSIwLjA2Ii8+PHJlY3QgeD0iMTg4IiB5PSIxNDQiIHdpZHRoPSI0IiBoZWlnaHQ9IjQiIGZpbGw9IiNmZmZkZWIiIG9wYWNpdHk9IjAuMSIvPgogIDxkZWZzPgogICAgPHJhZGlhbEdyYWRpZW50IGlkPSJnbG93MyI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9InJnYig3NCwxNDQsMjI2KSIgc3RvcC1vcGFjaXR5PSIwLjQ3Ii8+CiAgICAgIDxzdG9wIG9mZnNldD0iNjAlIiBzdG9wLWNvbG9yPSJyZ2IoMjU1LDI1MywyMzUpIiBzdG9wLW9wYWNpdHk9IjAuMTkiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSJyZ2IoMjU1LDI1MywyMzUpIiBzdG9wLW9wYWNpdHk9IjAiLz4KICAgIDwvcmFkaWFsR3JhZGllbnQ+CiAgICA8cmFkaWFsR3JhZGllbnQgaWQ9InBvcnRhbDMiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSJyZ2IoNzQsMTQ0LDIyNikiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSJyZ2IoMjU1LDI1MywyMzUpIi8+CiAgICA8L3JhZGlhbEdyYWRpZW50PgogIDwvZGVmcz4KICA8Y2lyY2xlIGN4PSIxNTAiIGN5PSIxNDAiIHI9IjQ3IiBmaWxsPSJ1cmwoI2dsb3czKSIvPgogIDxjaXJjbGUgY3g9IjE1MCIgY3k9IjE0MCIgcj0iMzMiIGZpbGw9InVybCgjcG9ydGFsMykiIG9wYWNpdHk9IjAuOSIvPgogIDxjaXJjbGUgY3g9IjE1MCIgY3k9IjE0MCIgcj0iMjUiIGZpbGw9ImhzbCgyMjQsIDMwJSwgMTMlKSIgb3BhY2l0eT0iMC41Ii8+CiAgPHRleHQgeD0iMTUwIiB5PSIxNDgiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IndoaXRlIiBmb250LWZhbWlseT0iU0YgUHJvIERpc3BsYXksIEhlbHZldGljYSBOZXVlLCBBcmlhbCwgc2Fucy1zZXJpZiIKICAgICAgICBmb250LXNpemU9IjM2IiBmb250LXdlaWdodD0iMzAwIiBsZXR0ZXItc3BhY2luZz0iNSI+CiAgICBUcnVlPHRzcGFuIGZpbGw9InJnYig3NCwxNDQsMjI2KSIgZm9udC13ZWlnaHQ9IjYwMCI+TDwvdHNwYW4+PHRzcGFuIGZvbnQtd2VpZ2h0PSI2MDAiIGZpbGw9InJnYigyNTUsMjUzLDIzNSkiPk88L3RzcGFuPjx0c3BhbiBmaWxsPSJyZ2IoNzQsMTQ0LDIyNikiIGZvbnQtd2VpZ2h0PSI2MDAiPlJFPC90c3Bhbj4KICA8L3RleHQ+CiAgPHRleHQgeD0iMTUwIiB5PSIyNDAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4yNSkiIGZvbnQtZmFtaWx5PSJtb25vc3BhY2UiIGZvbnQtc2l6ZT0iOSI+CiAgICBpdGVyYXRpb24gMyDCtyBzY29yZSA2LjgKICA8L3RleHQ+Cjwvc3ZnPg==" alt="Iteration 3"/>
+      </div>
+      <div class="card-body">
+        <div class="score-row">
+          <span class="score">6.8</span>
+          
+          <span class="iteration">#3</span>
+        </div>
+        <details>
+          <summary>Prompt</summary>
+          <p class="prompt-text">"TrueLORE" brand mark, portal O emits volumetric Carolina blue light with cream bloom, deep Turrell color field gradient behind text, pixel-perfect SNES-era detailing on serifs, Wes Anderson symmetry and color palette, refined and minimal</p>
+        </details>
+        <details>
+          <summary>Critiques (5 agents)</summary>
+          <div class="critiques"><div class="critique"><span class="agent-name">Apple</span><span class="agent-score">6.9</span><p>Almost there — the cream bloom is slightly too warm. Cool it down.</p></div><div class="critique"><span class="agent-name">ArtDirector</span><span class="agent-score">6.6</span><p>Good balance. Consider slightly reducing the glow radius for print.</p></div><div class="critique"><span class="agent-name">Turrell</span><span class="agent-score">6.9</span><p>This has presence. The light feels like it occupies space.</p></div><div class="critique"><span class="agent-name">Retro</span><span class="agent-score">7.2</span><p>The retro texture and modern form are in harmony now.</p></div><div class="critique"><span class="agent-name">Critic</span><span class="agent-score">6.4</span><p>Solid work. A few more refinements and this escapes the forgettable zone.</p></div></div>
+        </details>
+      </div>
+    </div>
+    <div class="card" data-score="7.4" data-iteration="4">
+      <div class="card-img">
+        <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMDAgMzAwIiB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCI+CiAgPHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIzMDAiIGZpbGw9ImhzbCgyMjQsIDMwJSwgMTQlKSIgcng9IjEyIi8+CiAgPHJlY3QgeD0iMzciIHk9IjM3IiB3aWR0aD0iMyIgaGVpZ2h0PSIzIiBmaWxsPSIjZmZmZGViIiBvcGFjaXR5PSIwLjE3Ii8+PHJlY3QgeD0iMjIxIiB5PSIyNzgiIHdpZHRoPSIzIiBoZWlnaHQ9IjMiIGZpbGw9IiNmZmZkZWIiIG9wYWNpdHk9IjAuMiIvPjxyZWN0IHg9IjE1OCIgeT0iNTYiIHdpZHRoPSIyIiBoZWlnaHQ9IjIiIGZpbGw9IiNmZmZkZWIiIG9wYWNpdHk9IjAuMDgiLz48cmVjdCB4PSIyNDAiIHk9IjU0IiB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjZmZmZGViIiBvcGFjaXR5PSIwLjA1Ii8+PHJlY3QgeD0iMjQiIHk9IjIyMSIgd2lkdGg9IjUiIGhlaWdodD0iNSIgZmlsbD0iI2ZmZmRlYiIgb3BhY2l0eT0iMC4xNCIvPjxyZWN0IHg9IjEyOCIgeT0iMjU2IiB3aWR0aD0iNSIgaGVpZ2h0PSI1IiBmaWxsPSIjZmZmZGViIiBvcGFjaXR5PSIwLjA2Ii8+PHJlY3QgeD0iNzkiIHk9IjIxMyIgd2lkdGg9IjQiIGhlaWdodD0iNCIgZmlsbD0iI2ZmZmRlYiIgb3BhY2l0eT0iMC4xIi8+PHJlY3QgeD0iMTUxIiB5PSIyNzMiIHdpZHRoPSI1IiBoZWlnaHQ9IjUiIGZpbGw9IiNmZmZkZWIiIG9wYWNpdHk9IjAuMTIiLz48cmVjdCB4PSI0MyIgeT0iMTM4IiB3aWR0aD0iNSIgaGVpZ2h0PSI1IiBmaWxsPSIjZmZmZGViIiBvcGFjaXR5PSIwLjA4Ii8+CiAgPGRlZnM+CiAgICA8cmFkaWFsR3JhZGllbnQgaWQ9Imdsb3c0Ij4KICAgICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0icmdiKDc0LDE0NCwyMjYpIiBzdG9wLW9wYWNpdHk9IjAuNTMiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSI2MCUiIHN0b3AtY29sb3I9InJnYigyNTUsMjUzLDIzNSkiIHN0b3Atb3BhY2l0eT0iMC4yMSIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9InJnYigyNTUsMjUzLDIzNSkiIHN0b3Atb3BhY2l0eT0iMCIvPgogICAgPC9yYWRpYWxHcmFkaWVudD4KICAgIDxyYWRpYWxHcmFkaWVudCBpZD0icG9ydGFsNCI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9InJnYig3NCwxNDQsMjI2KSIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9InJnYigyNTUsMjUzLDIzNSkiLz4KICAgIDwvcmFkaWFsR3JhZGllbnQ+CiAgPC9kZWZzPgogIDxjaXJjbGUgY3g9IjE1MCIgY3k9IjE0MCIgcj0iNTIiIGZpbGw9InVybCgjZ2xvdzQpIi8+CiAgPGNpcmNsZSBjeD0iMTUwIiBjeT0iMTQwIiByPSIzNCIgZmlsbD0idXJsKCNwb3J0YWw0KSIgb3BhY2l0eT0iMC45Ii8+CiAgPGNpcmNsZSBjeD0iMTUwIiBjeT0iMTQwIiByPSIyNiIgZmlsbD0iaHNsKDIyNCwgMzAlLCAxNCUpIiBvcGFjaXR5PSIwLjUiLz4KICA8dGV4dCB4PSIxNTAiIHk9IjE0OCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0id2hpdGUiIGZvbnQtZmFtaWx5PSJTRiBQcm8gRGlzcGxheSwgSGVsdmV0aWNhIE5ldWUsIEFyaWFsLCBzYW5zLXNlcmlmIgogICAgICAgIGZvbnQtc2l6ZT0iMzYiIGZvbnQtd2VpZ2h0PSIzMDAiIGxldHRlci1zcGFjaW5nPSI0Ij4KICAgIFRydWU8dHNwYW4gZmlsbD0icmdiKDc0LDE0NCwyMjYpIiBmb250LXdlaWdodD0iNjAwIj5MPC90c3Bhbj48dHNwYW4gZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0icmdiKDI1NSwyNTMsMjM1KSI+TzwvdHNwYW4+PHRzcGFuIGZpbGw9InJnYig3NCwxNDQsMjI2KSIgZm9udC13ZWlnaHQ9IjYwMCI+UkU8L3RzcGFuPgogIDwvdGV4dD4KICA8dGV4dCB4PSIxNTAiIHk9IjI0MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjI1KSIgZm9udC1mYW1pbHk9Im1vbm9zcGFjZSIgZm9udC1zaXplPSI5Ij4KICAgIGl0ZXJhdGlvbiA0IMK3IHNjb3JlIDcuNAogIDwvdGV4dD4KPC9zdmc+" alt="Iteration 4"/>
+      </div>
+      <div class="card-body">
+        <div class="score-row">
+          <span class="score">7.4</span>
+          <span class="badge">🥉 BRONZE</span>
+          <span class="iteration">#4</span>
+        </div>
+        <details>
+          <summary>Prompt</summary>
+          <p class="prompt-text">Premium "TrueLORE" wordmark, O as radiant portal disc in Carolina blue to cream gradient, atmospheric Turrell glow, 16-bit pixel noise texture, Wes Anderson centered layout with pastel accents, Apple design language, negative space, dark background</p>
+        </details>
+        <details>
+          <summary>Critiques (5 agents)</summary>
+          <div class="critiques"><div class="critique"><span class="agent-name">Apple</span><span class="agent-score">7.6</span><p>This has the quiet confidence of a great mark. Approved.</p></div><div class="critique"><span class="agent-name">ArtDirector</span><span class="agent-score">7.5</span><p>Publication-ready composition. The hierarchy is clear.</p></div><div class="critique"><span class="agent-name">Turrell</span><span class="agent-score">7.1</span><p>Transcendent. The O feels like looking into something infinite.</p></div><div class="critique"><span class="agent-name">Retro</span><span class="agent-score">7.0</span><p>Perfect fusion — this could be a title screen AND an app icon.</p></div><div class="critique"><span class="agent-name">Critic</span><span class="agent-score">7.8</span><p>Fine. I'll allow it. This has genuine character.</p></div></div>
+        </details>
+      </div>
+    </div>
+    <div class="card" data-score="7.64" data-iteration="5">
+      <div class="card-img">
+        <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMDAgMzAwIiB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCI+CiAgPHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIzMDAiIGZpbGw9ImhzbCgyMjQsIDMwJSwgMTUlKSIgcng9IjEyIi8+CiAgPHJlY3QgeD0iMTcyIiB5PSI2MiIgd2lkdGg9IjMiIGhlaWdodD0iMyIgZmlsbD0iI2ZmZmRlYiIgb3BhY2l0eT0iMC4wNSIvPjxyZWN0IHg9IjI3IiB5PSI5MyIgd2lkdGg9IjMiIGhlaWdodD0iMyIgZmlsbD0iI2ZmZmRlYiIgb3BhY2l0eT0iMC4xNSIvPjxyZWN0IHg9IjI3OSIgeT0iODgiIHdpZHRoPSIyIiBoZWlnaHQ9IjIiIGZpbGw9IiNmZmZkZWIiIG9wYWNpdHk9IjAuMTUiLz48cmVjdCB4PSI2MCIgeT0iMjUyIiB3aWR0aD0iMyIgaGVpZ2h0PSIzIiBmaWxsPSIjZmZmZGViIiBvcGFjaXR5PSIwLjE4Ii8+PHJlY3QgeD0iNDMiIHk9IjE4NCIgd2lkdGg9IjIiIGhlaWdodD0iMiIgZmlsbD0iI2ZmZmRlYiIgb3BhY2l0eT0iMC4xIi8+PHJlY3QgeD0iODYiIHk9IjI3OSIgd2lkdGg9IjMiIGhlaWdodD0iMyIgZmlsbD0iI2ZmZmRlYiIgb3BhY2l0eT0iMC4wOCIvPjxyZWN0IHg9IjI1MyIgeT0iMTE1IiB3aWR0aD0iNSIgaGVpZ2h0PSI1IiBmaWxsPSIjZmZmZGViIiBvcGFjaXR5PSIwLjEyIi8+PHJlY3QgeD0iNzAiIHk9IjEyNCIgd2lkdGg9IjMiIGhlaWdodD0iMyIgZmlsbD0iI2ZmZmRlYiIgb3BhY2l0eT0iMC4wOSIvPjxyZWN0IHg9Ijc4IiB5PSIxODIiIHdpZHRoPSIzIiBoZWlnaHQ9IjMiIGZpbGw9IiNmZmZkZWIiIG9wYWNpdHk9IjAuMTQiLz48cmVjdCB4PSIyMjUiIHk9IjI1MCIgd2lkdGg9IjUiIGhlaWdodD0iNSIgZmlsbD0iI2ZmZmRlYiIgb3BhY2l0eT0iMC4xMiIvPjxyZWN0IHg9IjI0IiB5PSIxMDkiIHdpZHRoPSIyIiBoZWlnaHQ9IjIiIGZpbGw9IiNmZmZkZWIiIG9wYWNpdHk9IjAuMDkiLz4KICA8ZGVmcz4KICAgIDxyYWRpYWxHcmFkaWVudCBpZD0iZ2xvdzUiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSJyZ2IoNzQsMTQ0LDIyNikiIHN0b3Atb3BhY2l0eT0iMC41OSIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjYwJSIgc3RvcC1jb2xvcj0icmdiKDI1NSwyNTMsMjM1KSIgc3RvcC1vcGFjaXR5PSIwLjIzIi8+CiAgICAgIDxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0icmdiKDI1NSwyNTMsMjM1KSIgc3RvcC1vcGFjaXR5PSIwIi8+CiAgICA8L3JhZGlhbEdyYWRpZW50PgogICAgPHJhZGlhbEdyYWRpZW50IGlkPSJwb3J0YWw1Ij4KICAgICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0icmdiKDc0LDE0NCwyMjYpIi8+CiAgICAgIDxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0icmdiKDI1NSwyNTMsMjM1KSIvPgogICAgPC9yYWRpYWxHcmFkaWVudD4KICA8L2RlZnM+CiAgPGNpcmNsZSBjeD0iMTUwIiBjeT0iMTQwIiByPSI1OCIgZmlsbD0idXJsKCNnbG93NSkiLz4KICA8Y2lyY2xlIGN4PSIxNTAiIGN5PSIxNDAiIHI9IjM2IiBmaWxsPSJ1cmwoI3BvcnRhbDUpIiBvcGFjaXR5PSIwLjkiLz4KICA8Y2lyY2xlIGN4PSIxNTAiIGN5PSIxNDAiIHI9IjI4IiBmaWxsPSJoc2woMjI0LCAzMCUsIDE1JSkiIG9wYWNpdHk9IjAuNSIvPgogIDx0ZXh0IHg9IjE1MCIgeT0iMTQ4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSJ3aGl0ZSIgZm9udC1mYW1pbHk9IlNGIFBybyBEaXNwbGF5LCBIZWx2ZXRpY2EgTmV1ZSwgQXJpYWwsIHNhbnMtc2VyaWYiCiAgICAgICAgZm9udC1zaXplPSIzNiIgZm9udC13ZWlnaHQ9IjMwMCIgbGV0dGVyLXNwYWNpbmc9IjMiPgogICAgVHJ1ZTx0c3BhbiBmaWxsPSJyZ2IoNzQsMTQ0LDIyNikiIGZvbnQtd2VpZ2h0PSI2MDAiPkw8L3RzcGFuPjx0c3BhbiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSJyZ2IoMjU1LDI1MywyMzUpIj5PPC90c3Bhbj48dHNwYW4gZmlsbD0icmdiKDc0LDE0NCwyMjYpIiBmb250LXdlaWdodD0iNjAwIj5SRTwvdHNwYW4+CiAgPC90ZXh0PgogIDx0ZXh0IHg9IjE1MCIgeT0iMjQwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMjUpIiBmb250LWZhbWlseT0ibW9ub3NwYWNlIiBmb250LXNpemU9IjkiPgogICAgaXRlcmF0aW9uIDUgwrcgc2NvcmUgNy42NAogIDwvdGV4dD4KPC9zdmc+" alt="Iteration 5"/>
+      </div>
+      <div class="card-body">
+        <div class="score-row">
+          <span class="score">7.64</span>
+          <span class="badge">🥉 BRONZE</span>
+          <span class="iteration">#5</span>
+        </div>
+        <details>
+          <summary>Prompt</summary>
+          <p class="prompt-text">"TrueLORE" — the O is a perfectly round glowing gate, Carolina blue center with cream light spill, Turrell-style ambient field, retro pixel rendering on edges, Wes Anderson color harmony, iconic simplicity, suitable for app icon and print</p>
+        </details>
+        <details>
+          <summary>Critiques (5 agents)</summary>
+          <div class="critiques"><div class="critique"><span class="agent-name">Apple</span><span class="agent-score">7.6</span><p>This has the quiet confidence of a great mark. Approved.</p></div><div class="critique"><span class="agent-name">ArtDirector</span><span class="agent-score">7.3</span><p>Publication-ready composition. The hierarchy is clear.</p></div><div class="critique"><span class="agent-name">Turrell</span><span class="agent-score">7.3</span><p>Transcendent. The O feels like looking into something infinite.</p></div><div class="critique"><span class="agent-name">Retro</span><span class="agent-score">8.1</span><p>Perfect fusion — this could be a title screen AND an app icon.</p></div><div class="critique"><span class="agent-name">Critic</span><span class="agent-score">7.9</span><p>Fine. I'll allow it. This has genuine character.</p></div></div>
+        </details>
+      </div>
+    </div>
+    <div class="card" data-score="8.38" data-iteration="6">
+      <div class="card-img">
+        <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMDAgMzAwIiB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCI+CiAgPHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIzMDAiIGZpbGw9ImhzbCgyMjQsIDMwJSwgMTYlKSIgcng9IjEyIi8+CiAgPHJlY3QgeD0iNzgiIHk9IjIyNCIgd2lkdGg9IjQiIGhlaWdodD0iNCIgZmlsbD0iI2ZmZmRlYiIgb3BhY2l0eT0iMC4wOCIvPjxyZWN0IHg9IjI0OSIgeT0iMTcxIiB3aWR0aD0iNSIgaGVpZ2h0PSI1IiBmaWxsPSIjZmZmZGViIiBvcGFjaXR5PSIwLjE5Ii8+PHJlY3QgeD0iNjciIHk9IjEyOSIgd2lkdGg9IjUiIGhlaWdodD0iNSIgZmlsbD0iI2ZmZmRlYiIgb3BhY2l0eT0iMC4xNiIvPjxyZWN0IHg9IjMxIiB5PSIxNjQiIHdpZHRoPSIzIiBoZWlnaHQ9IjMiIGZpbGw9IiNmZmZkZWIiIG9wYWNpdHk9IjAuMTYiLz48cmVjdCB4PSIxODEiIHk9IjgzIiB3aWR0aD0iNSIgaGVpZ2h0PSI1IiBmaWxsPSIjZmZmZGViIiBvcGFjaXR5PSIwLjEyIi8+PHJlY3QgeD0iMjQ2IiB5PSI4NCIgd2lkdGg9IjUiIGhlaWdodD0iNSIgZmlsbD0iI2ZmZmRlYiIgb3BhY2l0eT0iMC4yMiIvPjxyZWN0IHg9IjI0OCIgeT0iNDciIHdpZHRoPSIyIiBoZWlnaHQ9IjIiIGZpbGw9IiNmZmZkZWIiIG9wYWNpdHk9IjAuMjEiLz48cmVjdCB4PSI1NiIgeT0iOTIiIHdpZHRoPSIyIiBoZWlnaHQ9IjIiIGZpbGw9IiNmZmZkZWIiIG9wYWNpdHk9IjAuMjEiLz48cmVjdCB4PSIxNzciIHk9IjEyOSIgd2lkdGg9IjIiIGhlaWdodD0iMiIgZmlsbD0iI2ZmZmRlYiIgb3BhY2l0eT0iMC4yIi8+PHJlY3QgeD0iMjM1IiB5PSIyNjUiIHdpZHRoPSIyIiBoZWlnaHQ9IjIiIGZpbGw9IiNmZmZkZWIiIG9wYWNpdHk9IjAuMTUiLz48cmVjdCB4PSI0MCIgeT0iMTIxIiB3aWR0aD0iNSIgaGVpZ2h0PSI1IiBmaWxsPSIjZmZmZGViIiBvcGFjaXR5PSIwLjA3Ii8+PHJlY3QgeD0iMTE5IiB5PSIxNzEiIHdpZHRoPSIzIiBoZWlnaHQ9IjMiIGZpbGw9IiNmZmZkZWIiIG9wYWNpdHk9IjAuMTMiLz48cmVjdCB4PSIxODQiIHk9IjIxOSIgd2lkdGg9IjIiIGhlaWdodD0iMiIgZmlsbD0iI2ZmZmRlYiIgb3BhY2l0eT0iMC4xNCIvPgogIDxkZWZzPgogICAgPHJhZGlhbEdyYWRpZW50IGlkPSJnbG93NiI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9InJnYig3NCwxNDQsMjI2KSIgc3RvcC1vcGFjaXR5PSIwLjY0Ii8+CiAgICAgIDxzdG9wIG9mZnNldD0iNjAlIiBzdG9wLWNvbG9yPSJyZ2IoMjU1LDI1MywyMzUpIiBzdG9wLW9wYWNpdHk9IjAuMjYiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSJyZ2IoMjU1LDI1MywyMzUpIiBzdG9wLW9wYWNpdHk9IjAiLz4KICAgIDwvcmFkaWFsR3JhZGllbnQ+CiAgICA8cmFkaWFsR3JhZGllbnQgaWQ9InBvcnRhbDYiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSJyZ2IoNzQsMTQ0LDIyNikiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSJyZ2IoMjU1LDI1MywyMzUpIi8+CiAgICA8L3JhZGlhbEdyYWRpZW50PgogIDwvZGVmcz4KICA8Y2lyY2xlIGN4PSIxNTAiIGN5PSIxNDAiIHI9IjY0IiBmaWxsPSJ1cmwoI2dsb3c2KSIvPgogIDxjaXJjbGUgY3g9IjE1MCIgY3k9IjE0MCIgcj0iMzgiIGZpbGw9InVybCgjcG9ydGFsNikiIG9wYWNpdHk9IjAuOSIvPgogIDxjaXJjbGUgY3g9IjE1MCIgY3k9IjE0MCIgcj0iMzAiIGZpbGw9ImhzbCgyMjQsIDMwJSwgMTYlKSIgb3BhY2l0eT0iMC41Ii8+CiAgPHRleHQgeD0iMTUwIiB5PSIxNDgiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IndoaXRlIiBmb250LWZhbWlseT0iU0YgUHJvIERpc3BsYXksIEhlbHZldGljYSBOZXVlLCBBcmlhbCwgc2Fucy1zZXJpZiIKICAgICAgICBmb250LXNpemU9IjM2IiBmb250LXdlaWdodD0iMzAwIiBsZXR0ZXItc3BhY2luZz0iMiI+CiAgICBUcnVlPHRzcGFuIGZpbGw9InJnYig3NCwxNDQsMjI2KSIgZm9udC13ZWlnaHQ9IjYwMCI+TDwvdHNwYW4+PHRzcGFuIGZvbnQtd2VpZ2h0PSI2MDAiIGZpbGw9InJnYigyNTUsMjUzLDIzNSkiPk88L3RzcGFuPjx0c3BhbiBmaWxsPSJyZ2IoNzQsMTQ0LDIyNikiIGZvbnQtd2VpZ2h0PSI2MDAiPlJFPC90c3Bhbj4KICA8L3RleHQ+CiAgPHRleHQgeD0iMTUwIiB5PSIyNDAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4yNSkiIGZvbnQtZmFtaWx5PSJtb25vc3BhY2UiIGZvbnQtc2l6ZT0iOSI+CiAgICBpdGVyYXRpb24gNiDCtyBzY29yZSA4LjM4CiAgPC90ZXh0Pgo8L3N2Zz4=" alt="Iteration 6"/>
+      </div>
+      <div class="card-body">
+        <div class="score-row">
+          <span class="score">8.38</span>
+          <span class="badge">🥈 SILVER</span>
+          <span class="iteration">#6</span>
+        </div>
+        <details>
+          <summary>Prompt</summary>
+          <p class="prompt-text">Refined "TrueLORE" logo, luminous O portal casting Carolina blue and cream beams outward, Turrell light depth, subtle SNES dithering pattern, balanced Wes Anderson composition, modern yet nostalgic, obsessively minimal, dark navy canvas</p>
+        </details>
+        <details>
+          <summary>Critiques (5 agents)</summary>
+          <div class="critiques"><div class="critique"><span class="agent-name">Apple</span><span class="agent-score">8.5</span><p>This has the quiet confidence of a great mark. Approved.</p></div><div class="critique"><span class="agent-name">ArtDirector</span><span class="agent-score">8.4</span><p>Publication-ready composition. The hierarchy is clear.</p></div><div class="critique"><span class="agent-name">Turrell</span><span class="agent-score">8.2</span><p>Transcendent. The O feels like looking into something infinite.</p></div><div class="critique"><span class="agent-name">Retro</span><span class="agent-score">8.7</span><p>Perfect fusion — this could be a title screen AND an app icon.</p></div><div class="critique"><span class="agent-name">Critic</span><span class="agent-score">8.1</span><p>Fine. I'll allow it. This has genuine character.</p></div></div>
+        </details>
+      </div>
+    </div>
+    <div class="card" data-score="8.84" data-iteration="7">
+      <div class="card-img">
+        <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMDAgMzAwIiB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCI+CiAgPHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIzMDAiIGZpbGw9ImhzbCgyMjQsIDMwJSwgMTclKSIgcng9IjEyIi8+CiAgPHJlY3QgeD0iMjYzIiB5PSIxMTYiIHdpZHRoPSIyIiBoZWlnaHQ9IjIiIGZpbGw9IiNmZmZkZWIiIG9wYWNpdHk9IjAuMTgiLz48cmVjdCB4PSIyMTkiIHk9IjEzNiIgd2lkdGg9IjIiIGhlaWdodD0iMiIgZmlsbD0iI2ZmZmRlYiIgb3BhY2l0eT0iMC4xNiIvPjxyZWN0IHg9IjUzIiB5PSIyMjciIHdpZHRoPSIyIiBoZWlnaHQ9IjIiIGZpbGw9IiNmZmZkZWIiIG9wYWNpdHk9IjAuMTgiLz48cmVjdCB4PSIyNTkiIHk9IjI3IiB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjZmZmZGViIiBvcGFjaXR5PSIwLjA5Ii8+PHJlY3QgeD0iMTEyIiB5PSIxNTgiIHdpZHRoPSI1IiBoZWlnaHQ9IjUiIGZpbGw9IiNmZmZkZWIiIG9wYWNpdHk9IjAuMiIvPjxyZWN0IHg9IjI3MCIgeT0iMTA0IiB3aWR0aD0iMiIgaGVpZ2h0PSIyIiBmaWxsPSIjZmZmZGViIiBvcGFjaXR5PSIwLjA5Ii8+PHJlY3QgeD0iODEiIHk9IjM3IiB3aWR0aD0iMiIgaGVpZ2h0PSIyIiBmaWxsPSIjZmZmZGViIiBvcGFjaXR5PSIwLjA1Ii8+PHJlY3QgeD0iMTE4IiB5PSI2NCIgd2lkdGg9IjUiIGhlaWdodD0iNSIgZmlsbD0iI2ZmZmRlYiIgb3BhY2l0eT0iMC4xOSIvPjxyZWN0IHg9IjI3MCIgeT0iNjAiIHdpZHRoPSIyIiBoZWlnaHQ9IjIiIGZpbGw9IiNmZmZkZWIiIG9wYWNpdHk9IjAuMTciLz48cmVjdCB4PSIxNTciIHk9IjU1IiB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjZmZmZGViIiBvcGFjaXR5PSIwLjIyIi8+PHJlY3QgeD0iMjE2IiB5PSIyNDkiIHdpZHRoPSIzIiBoZWlnaHQ9IjMiIGZpbGw9IiNmZmZkZWIiIG9wYWNpdHk9IjAuMDUiLz48cmVjdCB4PSIyNTQiIHk9IjI4MCIgd2lkdGg9IjMiIGhlaWdodD0iMyIgZmlsbD0iI2ZmZmRlYiIgb3BhY2l0eT0iMC4wOSIvPjxyZWN0IHg9IjU2IiB5PSIyNzciIHdpZHRoPSI1IiBoZWlnaHQ9IjUiIGZpbGw9IiNmZmZkZWIiIG9wYWNpdHk9IjAuMTMiLz48cmVjdCB4PSIyNDAiIHk9IjE2OSIgd2lkdGg9IjIiIGhlaWdodD0iMiIgZmlsbD0iI2ZmZmRlYiIgb3BhY2l0eT0iMC4xOSIvPjxyZWN0IHg9Ijg1IiB5PSIyMTgiIHdpZHRoPSI1IiBoZWlnaHQ9IjUiIGZpbGw9IiNmZmZkZWIiIG9wYWNpdHk9IjAuMjMiLz4KICA8ZGVmcz4KICAgIDxyYWRpYWxHcmFkaWVudCBpZD0iZ2xvdzciPgogICAgICA8c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSJyZ2IoNzQsMTQ0LDIyNikiIHN0b3Atb3BhY2l0eT0iMC43Ii8+CiAgICAgIDxzdG9wIG9mZnNldD0iNjAlIiBzdG9wLWNvbG9yPSJyZ2IoMjU1LDI1MywyMzUpIiBzdG9wLW9wYWNpdHk9IjAuMjgiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSJyZ2IoMjU1LDI1MywyMzUpIiBzdG9wLW9wYWNpdHk9IjAiLz4KICAgIDwvcmFkaWFsR3JhZGllbnQ+CiAgICA8cmFkaWFsR3JhZGllbnQgaWQ9InBvcnRhbDciPgogICAgICA8c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSJyZ2IoNzQsMTQ0LDIyNikiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSJyZ2IoMjU1LDI1MywyMzUpIi8+CiAgICA8L3JhZGlhbEdyYWRpZW50PgogIDwvZGVmcz4KICA8Y2lyY2xlIGN4PSIxNTAiIGN5PSIxNDAiIHI9IjcwIiBmaWxsPSJ1cmwoI2dsb3c3KSIvPgogIDxjaXJjbGUgY3g9IjE1MCIgY3k9IjE0MCIgcj0iNDAiIGZpbGw9InVybCgjcG9ydGFsNykiIG9wYWNpdHk9IjAuOSIvPgogIDxjaXJjbGUgY3g9IjE1MCIgY3k9IjE0MCIgcj0iMzIiIGZpbGw9ImhzbCgyMjQsIDMwJSwgMTclKSIgb3BhY2l0eT0iMC41Ii8+CiAgPHRleHQgeD0iMTUwIiB5PSIxNDgiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IndoaXRlIiBmb250LWZhbWlseT0iU0YgUHJvIERpc3BsYXksIEhlbHZldGljYSBOZXVlLCBBcmlhbCwgc2Fucy1zZXJpZiIKICAgICAgICBmb250LXNpemU9IjM2IiBmb250LXdlaWdodD0iMzAwIiBsZXR0ZXItc3BhY2luZz0iMiI+CiAgICBUcnVlPHRzcGFuIGZpbGw9InJnYig3NCwxNDQsMjI2KSIgZm9udC13ZWlnaHQ9IjYwMCI+TDwvdHNwYW4+PHRzcGFuIGZvbnQtd2VpZ2h0PSI2MDAiIGZpbGw9InJnYigyNTUsMjUzLDIzNSkiPk88L3RzcGFuPjx0c3BhbiBmaWxsPSJyZ2IoNzQsMTQ0LDIyNikiIGZvbnQtd2VpZ2h0PSI2MDAiPlJFPC90c3Bhbj4KICA8L3RleHQ+CiAgPHRleHQgeD0iMTUwIiB5PSIyNDAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4yNSkiIGZvbnQtZmFtaWx5PSJtb25vc3BhY2UiIGZvbnQtc2l6ZT0iOSI+CiAgICBpdGVyYXRpb24gNyDCtyBzY29yZSA4Ljg0CiAgPC90ZXh0Pgo8L3N2Zz4=" alt="Iteration 7"/>
+      </div>
+      <div class="card-body">
+        <div class="score-row">
+          <span class="score">8.84</span>
+          <span class="badge">🥈 SILVER</span>
+          <span class="iteration">#7</span>
+        </div>
+        <details>
+          <summary>Prompt</summary>
+          <p class="prompt-text">"TrueLORE" final form — glowing O portal with Carolina blue/cream radiance, Turrell immersive light, pixel-perfect retro craft, Anderson symmetry, Apple restraint, timeless logo, dark background, world-class brand identity</p>
+        </details>
+        <details>
+          <summary>Critiques (5 agents)</summary>
+          <div class="critiques"><div class="critique"><span class="agent-name">Apple</span><span class="agent-score">8.7</span><p>This has the quiet confidence of a great mark. Approved.</p></div><div class="critique"><span class="agent-name">ArtDirector</span><span class="agent-score">9.0</span><p>Publication-ready composition. The hierarchy is clear.</p></div><div class="critique"><span class="agent-name">Turrell</span><span class="agent-score">8.8</span><p>Transcendent. The O feels like looking into something infinite.</p></div><div class="critique"><span class="agent-name">Retro</span><span class="agent-score">9.0</span><p>Perfect fusion — this could be a title screen AND an app icon.</p></div><div class="critique"><span class="agent-name">Critic</span><span class="agent-score">8.7</span><p>Fine. I'll allow it. This has genuine character.</p></div></div>
+        </details>
+      </div>
+    </div>
+</div>
+
+<footer>
+  TrueLORE Design Lab &middot; 8 iterations &middot; 5 critique agents
+</footer>
+
+</div>
+
+<script>
+function sortBy(key) {
+  let cards = Array.from(document.querySelectorAll('.card'));
+  cards.sort((a, b) => {
+    if (key === 'score') return parseFloat(b.dataset.score) - parseFloat(a.dataset.score);
+    return parseInt(a.dataset.iteration) - parseInt(b.dataset.iteration);
+  });
+  let grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  cards.forEach(c => grid.appendChild(c));
+  document.querySelectorAll('.controls button').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+}
+
+function filterMin(min) {
+  document.querySelectorAll('.card').forEach(c => {
+    c.style.display = parseFloat(c.dataset.score) >= min ? '' : 'none';
+  });
+  document.querySelectorAll('.controls button').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+}
+</script>
+
+</body>
+</html>
